@@ -1,6 +1,6 @@
 # FIL Owner Actor
 
-[![Test](https://github.com/NpoolFilecoin/fevm-owner-actor/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/NpoolFilecoin/fevm-owner-actor/actions/workflows/test.yml)
+[![Test](https://github.com/NpoolFilecoin/fevm-owner-actor/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/NpoolFilecoin/fevm-owner-actor/actions/workflows/test.yml)
 
 Implementation of owner account with FVM native actor
 
