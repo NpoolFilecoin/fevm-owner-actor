@@ -7,6 +7,7 @@ contract OwnerActor {
     address public creator;
 
     struct Miner {
+        // Initial power when custody, onchain data
         uint256 initialPower;
     }
 
@@ -16,6 +17,7 @@ contract OwnerActor {
         creator = msg.sender;
     }
 
+    /// @title Change Owner of specific miner to this running contract with initial condition
     function changeOwner(address minerId) public returns (address owner) {
         require(creator == msg.sender);
         miners[minerId] = Miner(0);
