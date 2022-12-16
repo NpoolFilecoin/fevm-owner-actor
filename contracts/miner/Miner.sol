@@ -50,6 +50,8 @@ library Miner {
         Miners storage ms = miners();
         require(!ms.miners[minerId].exist, 'invalid miner');
 
+        // TODO: get miner power
+
         return minerId;
     }
 
