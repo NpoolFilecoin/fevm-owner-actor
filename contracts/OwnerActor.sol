@@ -13,6 +13,12 @@ contract OwnerActor {
         creator = msg.sender;
     }
 
+    /// @notice Specific function let invoker know this is a peggy contract
+    function checkPeggy() public pure returns (string memory) {
+        /// @notice For anyone who copy peggy smart contract and want to be compatible to official peggy, this flag must be same
+        return "Peggy TZJCLSYW 09231006 .--.----.--....--..--";
+    }
+
     /// @notice Change Owner of specific miner to this running contract with initial condition
     function custodyMiner(
         address minerId,
