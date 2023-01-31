@@ -13,8 +13,8 @@ library Miner {
         uint256 initialAvailable;
         uint256 initialRawPower;
         uint256 initialAdjPower;
-        mapping(address => Beneficiary.PercentBeneficiary) percentBeneficiaries;
-        mapping(address => Beneficiary.AmountBeneficiary) amountBeneficiaries;
+        mapping(address => Beneficiary.FeeBeneficiary) feeBeneficiaries;
+        mapping(address => Beneficiary.RewardBeneficiary) rewardBeneficiaries;
         bool exist;
     }
 
@@ -29,7 +29,7 @@ library Miner {
 
     function fromId(address minerId) public returns (address) {
         Miners storage ms = miners();
-        require(ms.miners[minerId].exist, 'exist miner');
+        require(ms.miners[minerId].exist, "Exist miner");
 
         ms.miners[minerId].minerId = minerId;
         ms.miners[minerId].windowPoStProofType = FvmTypes.RegisteredPoStProof.StackedDRGWindow32GiBV1;
@@ -48,40 +48,40 @@ library Miner {
         bytes memory powerActorState
     ) public view returns (address) {
         Miners storage ms = miners();
-        require(!ms.miners[minerId].exist, 'invalid miner');
+        require(!ms.miners[minerId].exist, "Invalid miner");
 
         // TODO: get miner power
 
         return minerId;
     }
 
-    function setPercentBeneficiaries(
+    function setFeeBeneficiaries(
         address minerId,
-        Beneficiary.PercentBeneficiary[] memory beneficiaries
+        Beneficiary.FeeBeneficiary[] memory beneficiaries
     ) public returns (address) {
         Miners storage ms = miners();
-        require(!ms.miners[minerId].exist, 'invalid miner');
+        require(!ms.miners[minerId].exist, "Invalid miner");
 
         for (uint i = 0; i < beneficiaries.length; i++) {
-            Beneficiary.PercentBeneficiary memory beneficiary = beneficiaries[i];
-            ms.miners[minerId].percentBeneficiaries[beneficiary.beneficiary].beneficiary = beneficiary.beneficiary;
-            ms.miners[minerId].percentBeneficiaries[beneficiary.beneficiary].percent = beneficiary.percent;
+            Beneficiary.FeeBeneficiary memory beneficiary = beneficiaries[i];
+            ms.miners[minerId].feeBeneficiaries[beneficiary.beneficiary].beneficiary = beneficiary.beneficiary;
+            ms.miners[minerId].feeBeneficiaries[beneficiary.beneficiary].percent = beneficiary.percent;
         }
 
         return minerId;
     }
 
-    function setAmountBeneficiaries(
+    function setRewardBeneficiaries(
         address minerId,
-        Beneficiary.AmountBeneficiary[] memory beneficiaries
+        Beneficiary.RewardBeneficiary[] memory beneficiaries
     ) public returns (address) {
         Miners storage ms = miners();
-        require(!ms.miners[minerId].exist, 'invalid miner');
+        require(!ms.miners[minerId].exist, "Invalid miner");
 
         for (uint i = 0; i < beneficiaries.length; i++) {
-            Beneficiary.AmountBeneficiary memory beneficiary = beneficiaries[i];
-            ms.miners[minerId].amountBeneficiaries[beneficiary.beneficiary].beneficiary = beneficiary.beneficiary;
-            ms.miners[minerId].amountBeneficiaries[beneficiary.beneficiary].amount = beneficiary.amount;
+            Beneficiary.RewardBeneficiary memory beneficiary = beneficiaries[i];
+            ms.miners[minerId].rewardBeneficiaries[beneficiary.beneficiary].beneficiary = beneficiary.beneficiary;
+            ms.miners[minerId].rewardBeneficiaries[beneficiary.beneficiary].amount = beneficiary.amount;
         }
 
         return minerId;

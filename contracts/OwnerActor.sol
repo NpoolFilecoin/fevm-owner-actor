@@ -39,13 +39,13 @@ contract OwnerActor {
     function custodyMiner(
         address minerId,
         bytes memory powerActorState,
-        Beneficiary.PercentBeneficiary[] memory percentBeneficiaries,
-        Beneficiary.AmountBeneficiary[] memory amountBeneficiaries
+        Beneficiary.FeeBeneficiary[] memory feeBeneficiaries,
+        Beneficiary.RewardBeneficiary[] memory rewardBeneficiaries
     ) public returns (address) {
         Miner.fromId(minerId);
         Miner.initializeInfo(minerId, powerActorState);
-        Miner.setPercentBeneficiaries(minerId, percentBeneficiaries);
-        Miner.setAmountBeneficiaries(minerId, amountBeneficiaries);
+        Miner.setFeeBeneficiaries(minerId, feeBeneficiaries);
+        Miner.setRewardBeneficiaries(minerId, rewardBeneficiaries);
         return minerId;
     }
 }

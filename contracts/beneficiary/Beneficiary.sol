@@ -5,14 +5,14 @@ pragma solidity = 0.8.17;
 library Beneficiary {
     /// @title Beneficiary caculated by percent definition
     /// @author web3eye.io
-    struct PercentBeneficiary {
+    struct FeeBeneficiary {
         address beneficiary;
         uint32 percent;
     }
 
     /// @title Beneficiary caculated by deposited amount definition
     /// @author web3eye.io
-    struct AmountBeneficiary {
+    struct RewardBeneficiary {
         address beneficiary;
         uint256 amount;
     }
