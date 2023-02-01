@@ -7,7 +7,7 @@ library Beneficiary {
     /// @author web3eye.io
     struct FeeBeneficiary {
         address beneficiary;
-        uint32 percent;
+        uint8 percent;
     }
 
     /// @title Beneficiary caculated by deposited amount definition
