@@ -4,6 +4,9 @@ pragma solidity = 0.8.17;
 import "./beneficiary/Beneficiary.sol";
 import "./miner/Miner.sol";
 
+import "https://github.com/Zondax/filecoin-solidity/blob/v0.4.0-beta.1/contracts/v0.8/PowerAPI.sol";
+import "https://github.com/Zondax/filecoin-solidity/blob/v0.4.0-beta.1/contracts/v0.8/types/PowerTypes.sol";
+
 /// @title FEVM Owner actor
 /// @notice Owner actor implementation of Filecoin miner
 contract OwnerActor {
@@ -14,6 +17,7 @@ contract OwnerActor {
     }
     CustodyType custodyType = CustodyType.FIXED_FEE_RATE;
     uint8 benefitValue = 0;
+    event RawPowerReturn(PowerTypes.MinerRawPowerReturn ret);
 
     constructor(string memory _custodyType, uint8 value) {
         creator = msg.sender;
@@ -35,17 +39,20 @@ contract OwnerActor {
         return "Peggy TZJCLSYW 09231006 .--././--./--./-.--/-/--../.---/-.-./.-../.../-.--/.--/-----/----./..---/...--/.----/-----/-----/-....";
     }
 
+    function playPeggy(uint64 minerId) public {
+        emit RawPowerReturn(PowerAPI.minerRawPower(minerId));
+    }
+
     /// @notice Change Owner of specific miner to this running contract with initial condition
     function custodyMiner(
-        address minerId,
-        bytes memory powerActorState,
+        uint64 minerId,
         Beneficiary.FeeBeneficiary[] memory feeBeneficiaries,
         Beneficiary.RewardBeneficiary[] memory rewardBeneficiaries
-    ) public returns (address) {
+    ) public returns (string memory) {
         Miner.fromId(minerId);
-        Miner.initializeInfo(minerId, powerActorState);
+        Miner.initializeInfo(minerId);
         Miner.setFeeBeneficiaries(minerId, feeBeneficiaries);
         Miner.setRewardBeneficiaries(minerId, rewardBeneficiaries);
-        return minerId;
+        return Miner.toString(minerId);
     }
 }

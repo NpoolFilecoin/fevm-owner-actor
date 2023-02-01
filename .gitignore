@@ -2,3 +2,4 @@ bin
 hashes
 asm
 *.json
+.deps
