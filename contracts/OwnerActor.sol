@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity = 0.8.17;
 
-import './beneficiary/Beneficiary.sol';
-import './miner/Miner.sol';
+import "./beneficiary/Beneficiary.sol";
+import "./miner/Miner.sol";
 
 /// @title FEVM Owner actor
 /// @notice Owner actor implementation of Filecoin miner
