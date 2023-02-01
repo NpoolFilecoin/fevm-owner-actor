@@ -17,6 +17,8 @@ contract OwnerActor {
     }
     CustodyType custodyType = CustodyType.FIXED_FEE_RATE;
     uint8 benefitValue = 0;
+    mapping(uint64 => Miner._Miner) miners;
+
     event RawPowerReturn(PowerTypes.MinerRawPowerReturn ret);
 
     constructor(string memory _custodyType, uint8 value) {
@@ -48,11 +50,21 @@ contract OwnerActor {
         uint64 minerId,
         Beneficiary.FeeBeneficiary[] memory feeBeneficiaries,
         Beneficiary.RewardBeneficiary[] memory rewardBeneficiaries
-    ) public returns (string memory) {
-        Miner.fromId(minerId);
-        Miner.initializeInfo(minerId);
-        Miner.setFeeBeneficiaries(minerId, feeBeneficiaries);
-        Miner.setRewardBeneficiaries(minerId, rewardBeneficiaries);
-        return Miner.toString(minerId);
+    ) public {
+        Miner._Miner storage miner = miners[minerId];
+        require(!miner.exist, "Exist miner");
+
+        Miner.init(miner, minerId);
+        Miner.initializeInfo(miner);
+        Miner.setFeeBeneficiaries(miner, feeBeneficiaries);
+        Miner.setRewardBeneficiaries(miner, rewardBeneficiaries);
+    }
+
+    /// @notice Get miner entity with minerId
+    function getMiner(uint64 minerId) public view returns (string memory) {
+        Miner._Miner storage miner = miners[minerId];
+        require(miner.exist, "Invalid miner");
+
+        return Miner.toString(miner);
     }
 }
