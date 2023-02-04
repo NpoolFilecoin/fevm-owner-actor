@@ -5,10 +5,10 @@ import "../fvm/Types.sol";
 import "../beneficiary/Beneficiary.sol";
 import "../utils/Uint2Str.sol";
 
-// import "https://github.com/Zondax/filecoin-solidity/blob/v0.4.0-beta.1/contracts/v0.8/MinerAPI.sol";
-// import "https://github.com/Zondax/filecoin-solidity/blob/v0.4.0-beta.1/contracts/v0.8/types/MinerTypes.sol";
-import "https://github.com/Zondax/filecoin-solidity/blob/v0.4.0-beta.1/contracts/v0.8/PowerAPI.sol";
-import "https://github.com/Zondax/filecoin-solidity/blob/v0.4.0-beta.1/contracts/v0.8/types/PowerTypes.sol";
+import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/MinerAPI.sol";
+import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/types/MinerTypes.sol";
+import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/PowerAPI.sol";
+import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/types/PowerTypes.sol";
 
 library Miner {
     struct _Miner {
@@ -23,6 +23,8 @@ library Miner {
         address[] feeAddresses;
         mapping(address => Beneficiary.RewardBeneficiary) rewardBeneficiaries;
         address[] rewardAddresses;
+        bytes currentOwner;
+        bytes proposedOwner;
         bool exist;
     }
     event RawPowerReturn(PowerTypes.MinerRawPowerReturn ret);
@@ -30,12 +32,10 @@ library Miner {
     function init(_Miner storage miner, uint64 minerId) internal {
         miner.minerId = minerId;
         miner.windowPoStProofType = FvmTypes.RegisteredPoStProof.StackedDRGWindow32GiBV1;
-        miner.exist = true;
+        miner.exist = false;
     }
 
     function initializeInfo(_Miner storage miner) internal {
-        require(miner.exist, "Invalid miner");
-
         // TODO: get miner power
         PowerTypes.MinerRawPowerReturn memory ret = PowerAPI.minerRawPower(miner.minerId);
         emit RawPowerReturn(ret);
@@ -45,8 +45,6 @@ library Miner {
         _Miner storage miner,
         Beneficiary.FeeBeneficiary[] memory beneficiaries
     ) internal {
-        require(miner.exist, "Invalid miner");
-
         for (uint i = 0; i < beneficiaries.length; i++) {
             Beneficiary.FeeBeneficiary memory beneficiary = beneficiaries[i];
             miner.feeBeneficiaries[beneficiary.beneficiary].beneficiary = beneficiary.beneficiary;
@@ -59,8 +57,6 @@ library Miner {
         _Miner storage miner,
         Beneficiary.RewardBeneficiary[] memory beneficiaries
     ) internal {
-        require(miner.exist, "Invalid miner");
-
         for (uint i = 0; i < beneficiaries.length; i++) {
             Beneficiary.RewardBeneficiary memory beneficiary = beneficiaries[i];
             miner.rewardBeneficiaries[beneficiary.beneficiary].beneficiary = beneficiary.beneficiary;
@@ -69,12 +65,25 @@ library Miner {
         }
     }
 
-    function toString(_Miner storage miner) internal view returns (string memory) {
-        require(miner.exist, "Invalid miner");
+    function getOwner(_Miner storage miner) internal {
+        MinerTypes.GetOwnerReturn memory ret1 = MinerAPI.getOwner(miner.minerId);
+        miner.currentOwner = ret1.owner;
+        miner.proposedOwner = ret1.proposed;
+    }
 
+    function custody(_Miner storage miner) internal {
+        MinerTypes.GetOwnerReturn memory ret1 = MinerAPI.getOwner(miner.minerId);
+        MinerAPI.changeOwnerAddress(miner.minerId, ret1.proposed);
+    }
+
+    function toString(_Miner storage miner) internal view returns (string memory) {
         string memory feeBeneficiary = "[";
         for (uint32 i = 0; i < miner.feeAddresses.length; i++) {
             Beneficiary.FeeBeneficiary memory value = miner.feeBeneficiaries[miner.feeAddresses[i]];
+
+            if (i > 0) {
+                feeBeneficiary = string(bytes.concat(bytes(feeBeneficiary), bytes(",")));
+            }
 
             feeBeneficiary = string(bytes.concat(bytes(feeBeneficiary), bytes("{\"Address\":\"")));
             feeBeneficiary = string(bytes.concat(bytes(feeBeneficiary), abi.encode(value.beneficiary)));
@@ -90,6 +99,10 @@ library Miner {
         for (uint32 i = 0; i < miner.rewardAddresses.length; i++) {
             Beneficiary.RewardBeneficiary memory value = miner.rewardBeneficiaries[miner.rewardAddresses[i]];
 
+            if (i > 0) {
+                rewardBeneficiary = string(bytes.concat(bytes(rewardBeneficiary), bytes(",")));
+            }
+
             rewardBeneficiary = string(bytes.concat(bytes(rewardBeneficiary), bytes("{\"Address\":\"")));
             rewardBeneficiary = string(bytes.concat(bytes(rewardBeneficiary), abi.encode(value.beneficiary)));
 
@@ -104,6 +117,12 @@ library Miner {
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\"MinerID\":\"t0")));
         minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.minerId))));
+
+        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"CurrentOwner\":\"")));
+        minerStr = string(bytes.concat(bytes(minerStr), miner.currentOwner));
+
+        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"ProposedOwner\":\"")));
+        minerStr = string(bytes.concat(bytes(minerStr), miner.proposedOwner));
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"WindowPoStProofType\":\"")));
         if (miner.windowPoStProofType == FvmTypes.RegisteredPoStProof.StackedDRGWindow32GiBV1) {

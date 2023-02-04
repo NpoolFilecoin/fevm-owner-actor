@@ -4,8 +4,8 @@ pragma solidity = 0.8.17;
 import "./beneficiary/Beneficiary.sol";
 import "./miner/Miner.sol";
 
-import "https://github.com/Zondax/filecoin-solidity/blob/v0.4.0-beta.1/contracts/v0.8/PowerAPI.sol";
-import "https://github.com/Zondax/filecoin-solidity/blob/v0.4.0-beta.1/contracts/v0.8/types/PowerTypes.sol";
+import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/PowerAPI.sol";
+import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/types/PowerTypes.sol";
 
 /// @title FEVM Owner actor
 /// @notice Owner actor implementation of Filecoin miner
@@ -46,6 +46,10 @@ contract OwnerActor {
         emit RawPowerReturn(PowerAPI.minerRawPower(minerId));
     }
 
+    function getInfo() public view returns (address) {
+        return address(this);
+    }
+
     /// @notice Change Owner of specific miner to this running contract with initial condition
     function custodyMiner(
         uint64 minerId,
@@ -55,12 +59,22 @@ contract OwnerActor {
         Miner._Miner storage miner = miners[minerId];
         require(!miner.exist, "Exist miner");
 
-        minerIds.push(minerId);
-
         Miner.init(miner, minerId);
         Miner.initializeInfo(miner);
         Miner.setFeeBeneficiaries(miner, feeBeneficiaries);
         Miner.setRewardBeneficiaries(miner, rewardBeneficiaries);
+        Miner.custody(miner);
+
+        miner.exist = true;
+        minerIds.push(minerId);
+    }
+
+    /// @notice Get miner's owner
+    function getOwner(uint64 minerId) public {
+        Miner._Miner storage miner = miners[minerId];
+        require(miner.exist, "Invalid miner");
+
+        Miner.getOwner(miner);
     }
 
     /// @notice Get miner entity with minerId
@@ -76,6 +90,9 @@ contract OwnerActor {
         string memory minersStr = "[";
         for (uint i = 0; i < minerIds.length; i++) {
             Miner._Miner storage miner = miners[minerIds[i]];
+            if (i > 0) {
+                minersStr = string(bytes.concat(bytes(minersStr), bytes(",")));
+            }
             string memory minerStr = Miner.toString(miner);
             minersStr = string(bytes.concat(bytes(minersStr), bytes(minerStr)));
         }
