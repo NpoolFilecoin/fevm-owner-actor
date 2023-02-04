@@ -3,6 +3,7 @@ pragma solidity = 0.8.17;
 
 import "./beneficiary/Beneficiary.sol";
 import "./miner/Miner.sol";
+import "./utils/Uint2Str.sol";
 
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/PowerAPI.sol";
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/types/PowerTypes.sol";
@@ -46,8 +47,21 @@ contract OwnerActor {
         emit RawPowerReturn(PowerAPI.minerRawPower(minerId));
     }
 
-    function getInfo() public view returns (address) {
-        return address(this);
+    function whoAmI() public view returns (string memory) {
+        string memory str = "{";
+
+        str = string(bytes.concat(bytes(str), bytes("\"CustodyType\":\"")));
+        if (custodyType == CustodyType.FIXED_INCOME) {
+            str = string(bytes.concat(bytes(str), bytes("FixedIncome")));
+        } else if (custodyType == CustodyType.FIXED_FEE_RATE) {
+            str = string(bytes.concat(bytes(str), bytes("FixedFeeRate")));
+        }
+        
+        str = string(bytes.concat(bytes(str), bytes("\",\"BenefitValue\":\"")));
+        str = string(bytes.concat(bytes(str), bytes(Uint2Str.toString(benefitValue))));
+
+        str = string(bytes.concat(bytes(str), bytes("\"}")));
+        return str;
     }
 
     /// @notice Change Owner of specific miner to this running contract with initial condition
