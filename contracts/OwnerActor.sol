@@ -116,18 +116,22 @@ contract OwnerActor {
 
         Miner.init(miner, minerId);
         Miner.initializeInfo(miner);
+
         require(miner.initialAvailable >= 0, "Debt miner");
 
         Miner.setFeeBeneficiaries(miner, feeBeneficiaries);
+
+        uint256 totalAmount = miner.initialCollateral;
 
         uint8 totalPercent = 0;
         for (uint i = 0; i < _rewardBeneficiaries.length; i++) {
             require(_rewardBeneficiaries[i].percent > 0 && _rewardBeneficiaries[i].percent <= 100, "Invalid percent");
             totalPercent += _rewardBeneficiaries[i].percent;
         }
-        require(totalPercent == 100, "Invalid total percent");
 
-        uint256 totalAmount = miner.initialCollateral;
+        if (totalAmount > 0) {
+            require(totalPercent == 100, "Invalid total percent");
+        }
 
         setInitialRewardBeneficiaries(totalAmount, _rewardBeneficiaries);
         Miner.custody(miner);

@@ -6,12 +6,14 @@ library Bytes2Uint {
     *  @param _b    Source bytes should have length of 32
     *  @return      uint256
     */
-    function toUint256(bytes memory _bs) internal pure returns (uint256 value) {
-        require(_bs.length == 32, "bytes length is not 32.");
+    function toUint256(bytes memory _bytes) internal pure returns (uint256) {
+        require(_bytes.length >= 32, "toUint256_outOfBounds");
+        uint256 tempUint;
         assembly {
-            // load 32 bytes from memory starting from position _bs + 32
-            value := mload(add(_bs, 0x20))
+            tempUint := mload(add(add(_bytes, 0x20), 0))
         }
-        require(value <= 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, "Value exceeds the range");
+        require(tempUint <= 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, "toUint256_outOfRange");
+
+        return tempUint;
     }
 }
