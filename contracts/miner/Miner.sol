@@ -42,25 +42,24 @@ library Miner {
 
     function initializeInfo(_Miner storage miner) internal {
         MinerTypes.GetAvailableBalanceReturn memory ret1 = MinerAPI.getAvailableBalance(miner.minerId);
-        // uint256 initialAvailable = Bytes2Uint.toUint256(ret1.available_balance.val);
-        uint256 initialAvailable = 0;
+        uint256 initialAvailable = Bytes2Uint.toUint256(ret1.available_balance.val);
         if (ret1.available_balance.neg) {
             miner.initialAvailable = int256(initialAvailable) * -1;
         } else {
             miner.initialAvailable = int256(initialAvailable);
         }
 
-        /*
+        /* TODO: commented due to this call is error
         MinerTypes.GetVestingFundsReturn memory ret2 = MinerAPI.getVestingFunds(miner.minerId);
         uint256 initialVesting = 0;
         for (uint32 i = 0; i < ret2.vesting_funds.length; i++) {
             initialVesting += Bytes2Uint.toUint256(ret2.vesting_funds[i].amount.val);
         }
         miner.initialVesting = initialVesting;
+        */
 
         PowerTypes.MinerRawPowerReturn memory ret3 = PowerAPI.minerRawPower(miner.minerId);
         miner.initialRawPower = Bytes2Uint.toUint256(ret3.raw_byte_power.val);
-        */
     }
 
     function setFeeBeneficiaries(
