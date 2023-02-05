@@ -20,6 +20,8 @@ contract OwnerActor {
     uint8 benefitValue = 0;
     mapping(uint64 => Miner._Miner) miners;
     uint64[] minerIds;
+    mapping(address => Beneficiary.RewardBeneficiary) rewardBeneficiaries;
+    address[] rewardAddresses;
 
     event RawPowerReturn(PowerTypes.MinerRawPowerReturn ret);
 
@@ -60,35 +62,73 @@ contract OwnerActor {
         str = string(bytes.concat(bytes(str), bytes("\",\"BenefitValue\":\"")));
         str = string(bytes.concat(bytes(str), bytes(Uint2Str.toString(benefitValue))));
 
-        str = string(bytes.concat(bytes(str), bytes("\"}")));
+        string memory rewardBeneficiary = "[";
+        for (uint32 i = 0; i < rewardAddresses.length; i++) {
+            Beneficiary.RewardBeneficiary memory value = rewardBeneficiaries[rewardAddresses[i]];
+
+            if (i > 0) {
+                rewardBeneficiary = string(bytes.concat(bytes(rewardBeneficiary), bytes(",")));
+            }
+
+            rewardBeneficiary = string(bytes.concat(bytes(rewardBeneficiary), bytes("{\"Address\":\"")));
+            rewardBeneficiary = string(bytes.concat(bytes(rewardBeneficiary), abi.encode(value.beneficiary)));
+
+            rewardBeneficiary = string(bytes.concat(bytes(rewardBeneficiary), bytes("\",\"Amount\":\"")));
+            rewardBeneficiary = string(bytes.concat(bytes(rewardBeneficiary), bytes(Uint2Str.toString(value.amount))));
+
+            rewardBeneficiary = string(bytes.concat(bytes(rewardBeneficiary), bytes("\"}")));
+        }
+        rewardBeneficiary = string(bytes.concat(bytes(rewardBeneficiary), bytes("]")));
+
+        str = string(bytes.concat(bytes(str), bytes("\",\"RewardBeneficiaries\":")));
+        str = string(bytes.concat(bytes(str), bytes(rewardBeneficiary)));
+
+        str = string(bytes.concat(bytes(str), bytes("}")));
         return str;
     }
+
+    function setInitialRewardBeneficiaries(
+        uint256 totalAmount,
+        Beneficiary.FeeBeneficiary[] memory beneficiaries
+    ) internal {
+        for (uint i = 0; i < beneficiaries.length; i++) {
+            Beneficiary.FeeBeneficiary memory beneficiary = beneficiaries[i];
+            rewardBeneficiaries[beneficiary.beneficiary].beneficiary = beneficiary.beneficiary;
+            rewardBeneficiaries[beneficiary.beneficiary].amount = totalAmount * beneficiary.percent;
+            rewardAddresses.push(beneficiary.beneficiary);
+        }
+    }
+
 
     /// @notice Change Owner of specific miner to this running contract with initial condition
     function custodyMiner(
         uint64 minerId,
         Beneficiary.FeeBeneficiary[] memory feeBeneficiaries,
-        Beneficiary.RewardBeneficiary[] memory rewardBeneficiaries
+        Beneficiary.FeeBeneficiary[] memory _rewardBeneficiaries
     ) public {
         Miner._Miner storage miner = miners[minerId];
         require(!miner.exist, "Exist miner");
 
         Miner.init(miner, minerId);
         Miner.initializeInfo(miner);
+        require(miner.initialAvailable >= 0, "Debt miner");
+
         Miner.setFeeBeneficiaries(miner, feeBeneficiaries);
-        Miner.setRewardBeneficiaries(miner, rewardBeneficiaries);
+
+        uint8 totalPercent = 0;
+        for (uint i = 0; i < _rewardBeneficiaries.length; i++) {
+            require(_rewardBeneficiaries[i].percent > 0 && _rewardBeneficiaries[i].percent <= 100, "Invalid percent");
+            totalPercent += _rewardBeneficiaries[i].percent;
+        }
+        require(totalPercent == 100, "Invalid total percent");
+
+        uint256 totalAmount = miner.initialCollateral;
+
+        setInitialRewardBeneficiaries(totalAmount, _rewardBeneficiaries);
         Miner.custody(miner);
 
         miner.exist = true;
         minerIds.push(minerId);
-    }
-
-    /// @notice Get miner's owner
-    function getOwner(uint64 minerId) public {
-        Miner._Miner storage miner = miners[minerId];
-        require(miner.exist, "Invalid miner");
-
-        Miner.getOwner(miner);
     }
 
     /// @notice Get miner entity with minerId

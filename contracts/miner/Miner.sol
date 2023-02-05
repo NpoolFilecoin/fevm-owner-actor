@@ -4,30 +4,31 @@ pragma solidity = 0.8.17;
 import "../fvm/Types.sol";
 import "../beneficiary/Beneficiary.sol";
 import "../utils/Uint2Str.sol";
+import "../utils/Bytes2Uint.sol";
 
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/MinerAPI.sol";
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/types/MinerTypes.sol";
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/PowerAPI.sol";
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/types/PowerTypes.sol";
 
+// TODO: it's better to custody all control addresses to contract, but cannot currently
+
 library Miner {
     struct _Miner {
         uint64 minerId;
         FvmTypes.RegisteredPoStProof windowPoStProofType;
+        // TODO: we cannot get collateral currently
         uint256 initialCollateral;
         uint256 initialVesting;
-        uint256 initialAvailable;
+        int256 initialAvailable;
         uint256 initialRawPower;
+        // TODO: we cannot get adj power currently
         uint256 initialAdjPower;
         mapping(address => Beneficiary.FeeBeneficiary) feeBeneficiaries;
         address[] feeAddresses;
-        mapping(address => Beneficiary.RewardBeneficiary) rewardBeneficiaries;
-        address[] rewardAddresses;
-        bytes currentOwner;
-        bytes proposedOwner;
+        uint64 custodyOwner;
         bool exist;
     }
-    event RawPowerReturn(PowerTypes.MinerRawPowerReturn ret);
 
     function init(_Miner storage miner, uint64 minerId) internal {
         miner.minerId = minerId;
@@ -36,9 +37,23 @@ library Miner {
     }
 
     function initializeInfo(_Miner storage miner) internal {
-        // TODO: get miner power
-        PowerTypes.MinerRawPowerReturn memory ret = PowerAPI.minerRawPower(miner.minerId);
-        emit RawPowerReturn(ret);
+        MinerTypes.GetAvailableBalanceReturn memory ret1 = MinerAPI.getAvailableBalance(miner.minerId);
+        uint256 initialAvailable = Bytes2Uint.toUint256(ret1.available_balance.val);
+        if (ret1.available_balance.neg) {
+            miner.initialAvailable = int256(initialAvailable) * -1;
+        } else {
+            miner.initialAvailable = int256(initialAvailable);
+        }
+
+        MinerTypes.GetVestingFundsReturn memory ret2 = MinerAPI.getVestingFunds(miner.minerId);
+        uint256 initialVesting = 0;
+        for (uint32 i = 0; i < ret2.vesting_funds.length; i++) {
+            initialVesting += Bytes2Uint.toUint256(ret2.vesting_funds[i].amount.val);
+        }
+        miner.initialVesting = initialVesting;
+
+        PowerTypes.MinerRawPowerReturn memory ret3 = PowerAPI.minerRawPower(miner.minerId);
+        miner.initialRawPower = Bytes2Uint.toUint256(ret3.raw_byte_power.val);
     }
 
     function setFeeBeneficiaries(
@@ -53,26 +68,9 @@ library Miner {
         }
     }
 
-    function setRewardBeneficiaries(
-        _Miner storage miner,
-        Beneficiary.RewardBeneficiary[] memory beneficiaries
-    ) internal {
-        for (uint i = 0; i < beneficiaries.length; i++) {
-            Beneficiary.RewardBeneficiary memory beneficiary = beneficiaries[i];
-            miner.rewardBeneficiaries[beneficiary.beneficiary].beneficiary = beneficiary.beneficiary;
-            miner.rewardBeneficiaries[beneficiary.beneficiary].amount = beneficiary.amount;
-            miner.rewardAddresses.push(beneficiary.beneficiary);
-        }
-    }
-
-    function getOwner(_Miner storage miner) internal {
-        MinerTypes.GetOwnerReturn memory ret1 = MinerAPI.getOwner(miner.minerId);
-        miner.currentOwner = ret1.owner;
-        miner.proposedOwner = ret1.proposed;
-    }
-
     function custody(_Miner storage miner) internal {
         MinerTypes.GetOwnerReturn memory ret1 = MinerAPI.getOwner(miner.minerId);
+        miner.custodyOwner = uint64(Bytes2Uint.toUint256(ret1.owner));
         MinerAPI.changeOwnerAddress(miner.minerId, ret1.proposed);
     }
 
@@ -95,34 +93,13 @@ library Miner {
         }
         feeBeneficiary = string(bytes.concat(bytes(feeBeneficiary), bytes("]")));
 
-        string memory rewardBeneficiary = "[";
-        for (uint32 i = 0; i < miner.rewardAddresses.length; i++) {
-            Beneficiary.RewardBeneficiary memory value = miner.rewardBeneficiaries[miner.rewardAddresses[i]];
-
-            if (i > 0) {
-                rewardBeneficiary = string(bytes.concat(bytes(rewardBeneficiary), bytes(",")));
-            }
-
-            rewardBeneficiary = string(bytes.concat(bytes(rewardBeneficiary), bytes("{\"Address\":\"")));
-            rewardBeneficiary = string(bytes.concat(bytes(rewardBeneficiary), abi.encode(value.beneficiary)));
-
-            rewardBeneficiary = string(bytes.concat(bytes(rewardBeneficiary), bytes("\",\"Amount\":\"")));
-            rewardBeneficiary = string(bytes.concat(bytes(rewardBeneficiary), bytes(Uint2Str.toString(value.amount))));
-
-            rewardBeneficiary = string(bytes.concat(bytes(rewardBeneficiary), bytes("\"}")));
-        }
-        rewardBeneficiary = string(bytes.concat(bytes(rewardBeneficiary), bytes("]")));
-
         string memory minerStr = "{";
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\"MinerID\":\"t0")));
         minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.minerId))));
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"CurrentOwner\":\"")));
-        minerStr = string(bytes.concat(bytes(minerStr), miner.currentOwner));
-
-        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"ProposedOwner\":\"")));
-        minerStr = string(bytes.concat(bytes(minerStr), miner.proposedOwner));
+        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.custodyOwner))));
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"WindowPoStProofType\":\"")));
         if (miner.windowPoStProofType == FvmTypes.RegisteredPoStProof.StackedDRGWindow32GiBV1) {
@@ -140,7 +117,7 @@ library Miner {
         minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.initialVesting))));
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"InitialAvailable\":\"")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.initialAvailable))));
+        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(uint256(miner.initialAvailable)))));
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"InitialCollateral\":\"")));
         minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.initialRawPower))));
@@ -150,9 +127,6 @@ library Miner {
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"FeeBeneficiaries\":\"")));
         minerStr = string(bytes.concat(bytes(minerStr), bytes(feeBeneficiary)));
-
-        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"RewardBeneficiaries\":\"")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(rewardBeneficiary)));
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\"}")));
 
