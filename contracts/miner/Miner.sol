@@ -12,6 +12,10 @@ import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/P
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/types/PowerTypes.sol";
 
 // TODO: it's better to custody all control addresses to contract, but cannot currently
+//     then operator who hold the control addresses may withdraw funds
+//     or destroy the sectors. from point of economy they won't destroy the sectors
+//     due to that will also hurt their benefit. but they still have motivation to withdraw the balance
+//     which will be transferred for sealing from our contract
 
 library Miner {
     struct _Miner {

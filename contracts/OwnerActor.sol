@@ -8,6 +8,11 @@ import "./utils/Uint2Str.sol";
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/PowerAPI.sol";
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/types/PowerTypes.sol";
 
+// TODO: we cannot detect method 0 within runtime contract
+//     so we have to let a genesis account to record the deposit
+//     in that way we have to confirm the deposit action in a offline/centralized way
+//     and if the genesis account is hacked, then everything is gg
+
 /// @title FEVM Owner actor
 /// @notice Owner actor implementation of Filecoin miner
 contract OwnerActor {
