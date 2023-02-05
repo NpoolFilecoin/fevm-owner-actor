@@ -131,10 +131,10 @@ library Miner {
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"InitialAdjPower\":\"")));
         minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.initialAdjPower))));
 
-        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"FeeBeneficiaries\":\"")));
+        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"FeeBeneficiaries\":")));
         minerStr = string(bytes.concat(bytes(minerStr), bytes(feeBeneficiary)));
 
-        minerStr = string(bytes.concat(bytes(minerStr), bytes("\"}")));
+        minerStr = string(bytes.concat(bytes(minerStr), bytes("}")));
 
         return minerStr;
     }
