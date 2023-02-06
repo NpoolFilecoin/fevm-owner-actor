@@ -104,7 +104,7 @@ library Miner {
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\"MinerID\":\"t0")));
         minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.minerId))));
 
-        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"CurrentOwner\":\"")));
+        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"CustodyOwner\":\"")));
         minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.custodyOwner))));
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"WindowPoStProofType\":\"")));
