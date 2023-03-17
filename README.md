@@ -14,7 +14,7 @@ For Peggy, some key features are not supported by current F(E)VM implementation.
 * We still cannot custody worker and controll addresses to smart contract
 ```
 
-Peggy's vision is to build protocol to custody all miner functionalities to smart contract. It will cover whole life cycle of the miner. Idealy, we **don't** need to run any management of miner out of contract. But if Peggy want to go ahead with currently F(E)VM implementation, we need to
+Peggy's vision is to build protocol to custody all miner functionalities to smart contract. It will cover whole life cycle of the miner. Idealy, we **don't** need to run any management of miner out of contract. But if Peggy want to go ahead with currently F(E)VM implementation, we need to compromise with
 ```
 * Add some preset management accounts to smart contract instance, the number of accounts should be even
 * Implement a govenance machenism to let manager vote to replace management account
