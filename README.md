@@ -5,7 +5,7 @@
 Implementation of owner account with FVM native actor
 
 ## V0.1 for mainnet - 4/15
-**Congratulation to F(E)VM**. It's deployed to mainnet at 3/14, we can make something really funny with Filecoin.
+**Congratulation to F(E)VM**. It's deployed to mainnet at 3/14, we can make something really interesting with Filecoin.
 
 For Peggy, some key features are not supported by current F(E)VM implementation. It includes
 ```
