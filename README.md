@@ -9,7 +9,7 @@ Implementation of owner account with FVM native actor
 
 For Peggy, some key features are not supported by current F(E)VM implementation. It includes
 ```
-* Detect deposit of native FIL inside running smart contract instance
+* We still cannot detect deposit of native FIL inside running smart contract instance
 * Only a part of miner interfaces are exported to solidity contract, not all
 * We still cannot custody worker and controll addresses to smart contract
 ```
