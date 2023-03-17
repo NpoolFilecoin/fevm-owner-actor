@@ -23,6 +23,7 @@ contract Controllable {
 
     event ControllerAdded(address indexed proposer, address indexed controller);
     event ControllerDeleted(address indexed approver, address indexed controller);
+    event ControllerConfirmed(address indexed controller);
 
     /**
      * @dev Initializes the contract setting the deployer as the initial controller.
@@ -117,5 +118,6 @@ contract Controllable {
         for (uint8 i = 0; i < __addingApprovers[msgSender].length; i++) {
             __addingApprovers[msgSender].pop();
         }
+        emit ControllerConfirmed(msgSender);
     }
 }
