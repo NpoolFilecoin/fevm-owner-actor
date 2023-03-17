@@ -61,7 +61,7 @@ contract Controllable {
     /**
      * @dev Propose to add a new controller
      */
-    function _addController(address controller) public onlyController {
+    function addController(address controller) public onlyController {
         address msgSender = msg.sender;
         require(!_controllers[controller], "Controllable: address is already a controller");
         require(_deletingControllers[controller] == 0, "Controllable: address is deleting");
@@ -75,7 +75,7 @@ contract Controllable {
     /**
      * @dev Propose to delete a new controller
      */
-    function _deleteController(address controller) public onlyController {
+    function deleteController(address controller) public onlyController {
         address msgSender = msg.sender;
         require(_controllers[controller], "Controllable: address is not a controller");
         require(_addingControllers[controller] == 0, "Controllable: address is adding");
@@ -102,7 +102,7 @@ contract Controllable {
     /**
      * @dev Confirm to be a controller
      */
-    function _confirmController() public {
+    function confirmController() public {
         address msgSender = msg.sender;
         require(!_controllers[msgSender], "Controllable: address is already a controller");
         require(_addingControllers[msgSender] > _controllers_count * 2 / 3, "Controllable: address is voting");

@@ -25,15 +25,7 @@ contract OwnerActor is Controllable {
         return "Peggy TZJCLSYW 09231006 .--././--./--./-.--/-/--../.---/-.-./.-../.../-.--/.--/-----/----./..---/...--/.----/-----/-----/-....";
     }
 
-    function addController(address controller) public onlyController {
-        _addController(controller);
-    }
-
-    function deleteController(address controller) public onlyController {
-        _deleteController(controller);
-    }
-
-    function confirmController() public {
-        _confirmController();
+    function version() public pure returns (string memory) {
+        return "v0.1.0";
     }
 }
