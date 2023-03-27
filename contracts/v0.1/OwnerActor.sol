@@ -33,7 +33,7 @@ contract OwnerActor is Controllable {
 
     /// @notice Get custodied miner
     function getMiner() public view returns (string memory) {
-        require(_miner.exist, "Miner: there is no miner custodied");
+        require(_miner.exist, "Owner: there is no miner custodied");
         string memory minerStr = Miner.toString(_miner);
         return minerStr;
     }
@@ -43,7 +43,7 @@ contract OwnerActor is Controllable {
         uint64 minerId,
         Beneficiary.Percent[] memory percentBeneficiaries
     ) public onlyController {
-        require(!_miner.exist, "Miner: only allow to custody one miner");
+        require(!_miner.exist, "Owner: only allow to custody one miner");
 
         Miner.init(_miner, minerId);
         Miner.initializeInfo(_miner);
@@ -54,16 +54,24 @@ contract OwnerActor is Controllable {
 
         uint8 totalPercent = 0;
         for (uint i = 0; i < percentBeneficiaries.length; i++) {
-            require(percentBeneficiaries[i].percent > 0 && percentBeneficiaries[i].percent <= 100, "Miner: Invalid percent");
+            require(percentBeneficiaries[i].percent > 0 && percentBeneficiaries[i].percent <= 100, "Owner: invalid percent");
             totalPercent += percentBeneficiaries[i].percent;
         }
 
         if (totalAmount > 0) {
-            require(totalPercent == 100, "Miner: Invalid total percent");
+            require(totalPercent == 100, "Owner: invalid total percent");
         }
 
         Miner.custody(_miner);
 
         _miner.exist = true;
+    }
+
+    function setBeneficiary(
+        Beneficiary.Percent memory percentBeneficiary
+    ) public onlyController {
+        require(!_miner.exist, "Owner: only allow to custody one miner");
+        require(percentBeneficiary.percent < 100 && percentBeneficiary.percent > 0, "Owner: invalid percent");
+        Miner.setPercentBeneficiary(_miner, percentBeneficiary);
     }
 }

@@ -70,8 +70,37 @@ library Miner {
     ) internal {
         for (uint i = 0; i < beneficiaries.length; i++) {
             Beneficiary.Percent memory beneficiary = beneficiaries[i];
+            require(beneficiary.percent < 100 && beneficiary.percent > 0, "Miner: invalid percent");
             miner.percentBeneficiaries[beneficiary.beneficiary].beneficiary = beneficiary.beneficiary;
             miner.percentBeneficiaries[beneficiary.beneficiary].percent = beneficiary.percent;
+            miner.percentBeneficiaryAddresses.push(beneficiary.beneficiary);
+        }
+    }
+
+    function setPercentBeneficiary(
+        _Miner storage miner,
+        Beneficiary.Percent memory beneficiary
+    ) internal {
+        Beneficiary.Percent memory oldBeneficiary = miner.percentBeneficiaries[beneficiary.beneficiary];
+        uint8 newPercent = oldBeneficiary.percent + beneficiary.percent;
+        require(newPercent < 100, "Miner: invalid percent");
+
+        bool exist = false;
+
+        for (uint i = 0; i < miner.percentBeneficiaryAddresses.length; i++) {
+            address _beneficiary = miner.percentBeneficiaryAddresses[i];
+            if (_beneficiary == beneficiary.beneficiary) {
+                exist = true;
+                continue;
+            }
+            miner.percentBeneficiaries[_beneficiary].percent *= (100 - newPercent);
+            miner.percentBeneficiaries[_beneficiary].percent /= 100;
+        }
+
+        miner.percentBeneficiaries[beneficiary.beneficiary].beneficiary = beneficiary.beneficiary;
+        miner.percentBeneficiaries[beneficiary.beneficiary].percent = beneficiary.percent;
+
+        if (exist) {
             miner.percentBeneficiaryAddresses.push(beneficiary.beneficiary);
         }
     }
