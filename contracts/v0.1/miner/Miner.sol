@@ -5,6 +5,7 @@ import "../fvm/Types.sol";
 import "../beneficiary/Beneficiary.sol";
 import "../utils/Uint2Str.sol";
 import "../utils/Bytes2Uint.sol";
+import "../controller/Controllable.sol";
 
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/MinerAPI.sol";
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/types/MinerTypes.sol";
@@ -28,19 +29,19 @@ library Miner {
         uint256 initialRawPower;
         // TODO: we cannot get adj power currently
         uint256 initialAdjPower;
-        mapping(address => Beneficiary.FeeBeneficiary) feeBeneficiaries;
-        address[] feeAddresses;
+        mapping(address => Beneficiary.Percent) percentBeneficiaries;
+        address[] percentBeneficiaryAddresses;
         uint64 custodyOwner;
         bool exist;
     }
 
-    function init(_Miner storage miner, uint64 minerId) internal {
+    function init(_Miner storage miner, uint64 minerId) internal onlyController {
         miner.minerId = minerId;
         miner.windowPoStProofType = FvmTypes.RegisteredPoStProof.StackedDRGWindow32GiBV1;
         miner.exist = false;
     }
 
-    function initializeInfo(_Miner storage miner) internal {
+    function initializeInfo(_Miner storage miner) internal onlyController {
         MinerTypes.GetAvailableBalanceReturn memory ret1 = MinerAPI.getAvailableBalance(miner.minerId);
         uint256 initialAvailable = Bytes2Uint.toUint256(ret1.available_balance.val);
         if (ret1.available_balance.neg) {
@@ -62,42 +63,42 @@ library Miner {
         miner.initialRawPower = Bytes2Uint.toUint256(ret3.raw_byte_power.val);
     }
 
-    function setFeeBeneficiaries(
+    function setPercentBeneficiaries(
         _Miner storage miner,
-        Beneficiary.FeeBeneficiary[] memory beneficiaries
-    ) internal {
+        Beneficiary.Percent[] memory beneficiaries
+    ) internal onlyController {
         for (uint i = 0; i < beneficiaries.length; i++) {
-            Beneficiary.FeeBeneficiary memory beneficiary = beneficiaries[i];
-            miner.feeBeneficiaries[beneficiary.beneficiary].beneficiary = beneficiary.beneficiary;
-            miner.feeBeneficiaries[beneficiary.beneficiary].percent = beneficiary.percent;
-            miner.feeAddresses.push(beneficiary.beneficiary);
+            Beneficiary.Percent memory beneficiary = beneficiaries[i];
+            miner.percentBeneficiaries[beneficiary.beneficiary].beneficiary = beneficiary.beneficiary;
+            miner.percentBeneficiaries[beneficiary.beneficiary].percent = beneficiary.percent;
+            miner.percentBeneficiaryAddresses.push(beneficiary.beneficiary);
         }
     }
 
-    function custody(_Miner storage miner) internal {
+    function custody(_Miner storage miner) internal onlyController {
         MinerTypes.GetOwnerReturn memory ret1 = MinerAPI.getOwner(miner.minerId);
         miner.custodyOwner = uint64(Bytes2Uint.toUint256(ret1.owner));
         MinerAPI.changeOwnerAddress(miner.minerId, ret1.proposed);
     }
 
     function toString(_Miner storage miner) internal view returns (string memory) {
-        string memory feeBeneficiary = "[";
+        string memory percentBeneficiary = "[";
         for (uint32 i = 0; i < miner.feeAddresses.length; i++) {
-            Beneficiary.FeeBeneficiary memory value = miner.feeBeneficiaries[miner.feeAddresses[i]];
+            Beneficiary.Percent memory value = miner.PercentBeneficiaries[miner.feeAddresses[i]];
 
             if (i > 0) {
-                feeBeneficiary = string(bytes.concat(bytes(feeBeneficiary), bytes(",")));
+                percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(",")));
             }
 
-            feeBeneficiary = string(bytes.concat(bytes(feeBeneficiary), bytes("{\"Address\":\"")));
-            feeBeneficiary = string(bytes.concat(bytes(feeBeneficiary), abi.encode(value.beneficiary)));
+            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes("{\"Address\":\"")));
+            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), abi.encode(value.beneficiary)));
 
-            feeBeneficiary = string(bytes.concat(bytes(feeBeneficiary), bytes("\",\"Percent\":")));
-            feeBeneficiary = string(bytes.concat(bytes(feeBeneficiary), bytes(Uint2Str.toString(value.percent))));
+            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes("\",\"Percent\":")));
+            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(Uint2Str.toString(value.percent))));
 
-            feeBeneficiary = string(bytes.concat(bytes(feeBeneficiary), bytes("}")));
+            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes("}")));
         }
-        feeBeneficiary = string(bytes.concat(bytes(feeBeneficiary), bytes("]")));
+        percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes("]")));
 
         string memory minerStr = "{";
 
@@ -131,8 +132,8 @@ library Miner {
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"InitialAdjPower\":\"")));
         minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.initialAdjPower))));
 
-        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"FeeBeneficiaries\":")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(feeBeneficiary)));
+        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"PercentBeneficiaries\":")));
+        minerStr = string(bytes.concat(bytes(minerStr), bytes(percentBeneficiary)));
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("}")));
 

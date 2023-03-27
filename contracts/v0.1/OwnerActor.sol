@@ -2,6 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "./controller/Controllable.sol";
+import "./miner/Miner.sol";
 
 // import "https://github.com/Zondax/filecoin-solidity/blob/v4.0.2/contracts/v0.8/PowerAPI.sol";
 // import "https://github.com/Zondax/filecoin-solidity/blob/v4.0.2/contracts/v0.8/types/PowerTypes.sol";
@@ -14,7 +15,7 @@ import "./controller/Controllable.sol";
 /// @title FEVM Owner actor
 /// @notice Owner actor implementation of Filecoin miner
 contract OwnerActor is Controllable {
-    address private _storageProvider;
+    Miner._Miner private _miner;
 
     constructor() {
     }
@@ -27,5 +28,13 @@ contract OwnerActor is Controllable {
 
     function version() public pure returns (string memory) {
         return "v0.1.0";
+    }
+
+    /// @notice Get custodied miner
+    function getMiner() public view returns (string memory) {
+        require(_miner.exist, "Miner: there is no miner custodied");
+        string memory minerStr = Miner.toString(_miner);
+        minersStr = string(bytes.concat(bytes(minersStr), bytes(minerStr)));
+        return minersStr;
     }
 }
