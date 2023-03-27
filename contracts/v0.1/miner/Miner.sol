@@ -5,12 +5,12 @@ import "../fvm/Types.sol";
 import "../beneficiary/Beneficiary.sol";
 import "../utils/Uint2Str.sol";
 import "../utils/Bytes2Uint.sol";
-import "../controller/Controllable.sol";
 
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/MinerAPI.sol";
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/types/MinerTypes.sol";
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/PowerAPI.sol";
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/types/PowerTypes.sol";
+import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/types/CommonTypes.sol";
 
 // TODO: it's better to custody all control addresses to contract, but cannot currently
 //     then operator who hold the control addresses may withdraw funds
@@ -35,16 +35,17 @@ library Miner {
         bool exist;
     }
 
-    function init(_Miner storage miner, uint64 minerId) internal onlyController {
+    function init(_Miner storage miner, uint64 minerId) internal {
         miner.minerId = minerId;
         miner.windowPoStProofType = FvmTypes.RegisteredPoStProof.StackedDRGWindow32GiBV1;
         miner.exist = false;
     }
 
-    function initializeInfo(_Miner storage miner) internal onlyController {
-        MinerTypes.GetAvailableBalanceReturn memory ret1 = MinerAPI.getAvailableBalance(miner.minerId);
-        uint256 initialAvailable = Bytes2Uint.toUint256(ret1.available_balance.val);
-        if (ret1.available_balance.neg) {
+    function initializeInfo(_Miner storage miner) internal {
+        CommonTypes.FilActorId actorId = CommonTypes.FilActorId.wrap(miner.minerId);
+        CommonTypes.BigInt memory ret1 = MinerAPI.getAvailableBalance(actorId);
+        uint256 initialAvailable = Bytes2Uint.toUint256(ret1.val);
+        if (ret1.neg) {
             miner.initialAvailable = int256(initialAvailable) * -1;
         } else {
             miner.initialAvailable = int256(initialAvailable);
@@ -66,7 +67,7 @@ library Miner {
     function setPercentBeneficiaries(
         _Miner storage miner,
         Beneficiary.Percent[] memory beneficiaries
-    ) internal onlyController {
+    ) internal {
         for (uint i = 0; i < beneficiaries.length; i++) {
             Beneficiary.Percent memory beneficiary = beneficiaries[i];
             miner.percentBeneficiaries[beneficiary.beneficiary].beneficiary = beneficiary.beneficiary;
@@ -75,16 +76,17 @@ library Miner {
         }
     }
 
-    function custody(_Miner storage miner) internal onlyController {
-        MinerTypes.GetOwnerReturn memory ret1 = MinerAPI.getOwner(miner.minerId);
-        miner.custodyOwner = uint64(Bytes2Uint.toUint256(ret1.owner));
-        MinerAPI.changeOwnerAddress(miner.minerId, ret1.proposed);
+    function custody(_Miner storage miner) internal {
+        CommonTypes.FilActorId actorId = CommonTypes.FilActorId.wrap(miner.minerId);
+        MinerTypes.GetOwnerReturn memory ret1 = MinerAPI.getOwner(actorId);
+        miner.custodyOwner = uint64(Bytes2Uint.toUint256(ret1.owner.data));
+        MinerAPI.changeOwnerAddress(actorId, ret1.proposed);
     }
 
     function toString(_Miner storage miner) internal view returns (string memory) {
         string memory percentBeneficiary = "[";
-        for (uint32 i = 0; i < miner.feeAddresses.length; i++) {
-            Beneficiary.Percent memory value = miner.PercentBeneficiaries[miner.feeAddresses[i]];
+        for (uint32 i = 0; i < miner.percentBeneficiaryAddresses.length; i++) {
+            Beneficiary.Percent memory value = miner.percentBeneficiaries[miner.percentBeneficiaryAddresses[i]];
 
             if (i > 0) {
                 percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(",")));

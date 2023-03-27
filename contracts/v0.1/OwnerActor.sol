@@ -34,7 +34,6 @@ contract OwnerActor is Controllable {
     function getMiner() public view returns (string memory) {
         require(_miner.exist, "Miner: there is no miner custodied");
         string memory minerStr = Miner.toString(_miner);
-        minersStr = string(bytes.concat(bytes(minersStr), bytes(minerStr)));
-        return minersStr;
+        return minerStr;
     }
 }
