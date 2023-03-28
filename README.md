@@ -26,6 +26,9 @@ Of course, Peggy contract should be able to act as owner account, record deposit
 
 ![image](https://user-images.githubusercontent.com/13128505/228172394-6a1d6741-ab88-4c08-a680-c4e3d5080016.png)
 
+### APIs
+- custodyMiner ```Code```[X] ```Test```[X]
+
 ## Functionalities
 ### Base functionalities
 - [ ] Custody miner
