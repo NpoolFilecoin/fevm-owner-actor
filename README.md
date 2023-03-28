@@ -38,7 +38,7 @@ Of course, Peggy contract should be able to act as owner account, record deposit
 - sendToPoStControl ```Code``` &#x2705; ```Test``` &#x231B;
 
 ### Beneficiary APIs
-- setBeneficiary ```Code``` &#x2705; ```Test``` &#x231B;
+- setBeneficiary ```Code``` &#x2705; ```Test``` &#x2705;
 
 ### Smart Contract Controller APIs
 - addController ```Code``` &#x2705; ```Test``` &#x231B;
