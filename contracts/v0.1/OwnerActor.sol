@@ -100,7 +100,7 @@ contract OwnerActor is Controllable {
         require(balance > amount, "Owner: insufficient funds - account");
         require(address(this).balance > amount, "Owner: insufficient funds - contract");
         _to.transfer(amount);
-        Miner.withdrawReward(_miner, amount);
+        Miner.withdrawReward(_miner, _to, amount);
     }
 
     function sendToWorker(uint256 amount) public onlyController {
