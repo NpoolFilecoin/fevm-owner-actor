@@ -28,6 +28,7 @@ Of course, Peggy contract should be able to act as owner account, record deposit
 
 ### APIs
 - custodyMiner ```Code``` &#x2705; ```Test``` &#x2705;
+- escapeMiner ```Code``` &#x2705; ```Test``` &#x231B;
 
 ## Functionalities
 ### Base functionalities
