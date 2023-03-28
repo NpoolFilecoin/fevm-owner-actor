@@ -33,7 +33,7 @@ Of course, Peggy contract should be able to act as owner account, record deposit
 - setWorker ```Code``` &#x2705; ```Test``` &#x231B;
 - setPoStControl ```Code``` &#x2705; ```Test``` &#x231B;
 - withdraw ```Code``` &#x2705; ```Test``` &#x231B;
-- accounting ```Code``` &#x2705; ```Test``` &#x231B;
+- accounting ```Code``` &#x231B; ```Test``` &#x231B;
 - sendToWorker ```Code``` &#x2705; ```Test``` &#x231B;
 - sendToPoStControl ```Code``` &#x2705; ```Test``` &#x231B;
 
