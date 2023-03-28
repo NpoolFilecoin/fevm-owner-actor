@@ -24,7 +24,7 @@ Peggy's vision is to build protocol to custody all miner functionalities to smar
 
 Of course, Peggy contract should be able to act as owner account, record depositers, calculate and distribute period reward. So we decide to develop **V0.1** version of the contract firstly for current mainnet F(E)VM. It's not a finance protocol, it's only an accounting tools to for different share holder of a miner. It'll be deployed to mainnet soon with our test miner.
 
-![image](https://user-images.githubusercontent.com/13128505/228171389-25cc68cf-c3a0-468f-8631-453ea6cabbf8.png)
+![image](https://user-images.githubusercontent.com/13128505/228172394-6a1d6741-ab88-4c08-a680-c4e3d5080016.png)
 
 ## Functionalities
 ### Base functionalities
