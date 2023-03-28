@@ -133,6 +133,10 @@ library Miner {
         return _amount;
     }
 
+    function withdrawReward(_Miner storage miner, address beneficiary, uint256 amount) public {
+        miner.percentBeneficiaries[beneficiary].balance -= amount;
+    }
+
     function accounting(_Miner storage miner, uint256 amount) public {
         for (uint32 i = 0; i < miner.percentBeneficiaryAddresses.length; i++) {
             Beneficiary.Percent memory beneficiary = miner.percentBeneficiaries[miner.percentBeneficiaryAddresses[i]];

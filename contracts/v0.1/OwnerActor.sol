@@ -79,6 +79,7 @@ contract OwnerActor is Controllable {
         if (amount == 0) {
             return;
         }
+        Miner.accounting(_miner, amount);
     }
 
     function setWorker(address newWorkerActorId) public onlyController {
@@ -99,6 +100,7 @@ contract OwnerActor is Controllable {
         require(balance > amount, "Owner: insufficient funds - account");
         require(address(this).balance > amount, "Owner: insufficient funds - contract");
         _to.transfer(amount);
+        Miner.withdrawReward(_miner, amount);
     }
 
     function sendToWorker(uint256 amount) public onlyController {
