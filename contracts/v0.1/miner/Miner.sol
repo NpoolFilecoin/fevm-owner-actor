@@ -42,13 +42,13 @@ library Miner {
         bool exist;
     }
 
-    function init(_Miner storage miner, uint64 minerId) internal {
+    function init(_Miner storage miner, uint64 minerId) public {
         miner.minerId = minerId;
         miner.windowPoStProofType = FvmTypes.RegisteredPoStProof.StackedDRGWindow32GiBV1;
         miner.exist = false;
     }
 
-    function initializeInfo(_Miner storage miner) internal {
+    function initializeInfo(_Miner storage miner) public {
         CommonTypes.FilActorId actorId = CommonTypes.FilActorId.wrap(miner.minerId);
         CommonTypes.BigInt memory ret1 = MinerAPI.getAvailableBalance(actorId);
         uint256 initialAvailable = Bytes2Uint.toUint256(ret1.val);
@@ -74,7 +74,7 @@ library Miner {
     function setPercentBeneficiaries(
         _Miner storage miner,
         Beneficiary.Percent[] memory beneficiaries
-    ) internal {
+    ) public {
         for (uint i = 0; i < beneficiaries.length; i++) {
             Beneficiary.Percent memory beneficiary = beneficiaries[i];
             require(beneficiary.percent < 100 && beneficiary.percent > 0, "Miner: invalid percent");
@@ -87,7 +87,7 @@ library Miner {
     function setPercentBeneficiary(
         _Miner storage miner,
         Beneficiary.Percent memory beneficiary
-    ) internal {
+    ) public {
         Beneficiary.Percent memory oldBeneficiary = miner.percentBeneficiaries[beneficiary.beneficiary];
         uint8 newPercent = oldBeneficiary.percent + beneficiary.percent;
         require(newPercent < 100, "Miner: invalid percent");
@@ -112,20 +112,20 @@ library Miner {
         }
     }
 
-    function custody(_Miner storage miner) internal {
+    function custody(_Miner storage miner) public {
         CommonTypes.FilActorId actorId = CommonTypes.FilActorId.wrap(miner.minerId);
         MinerTypes.GetOwnerReturn memory ret1 = MinerAPI.getOwner(actorId);
         miner.custodyOwner = uint64(Bytes2Uint.toUint256(ret1.owner.data));
         MinerAPI.changeOwnerAddress(actorId, ret1.proposed);
     }
 
-    function escape(_Miner storage miner, address newOwner) internal {
+    function escape(_Miner storage miner, address newOwner) public {
         CommonTypes.FilActorId actorId = CommonTypes.FilActorId.wrap(miner.minerId);
         CommonTypes.FilAddress memory addr = FilAddresses.fromEthAddress(newOwner);
         MinerAPI.changeOwnerAddress(actorId, addr);
     }
 
-    function withdraw(_Miner storage miner) internal returns (uint256) {
+    function withdraw(_Miner storage miner) public returns (uint256) {
         CommonTypes.FilActorId actorId = CommonTypes.FilActorId.wrap(miner.minerId);
         CommonTypes.BigInt memory amount = MinerAPI.withdrawBalance(actorId, BigInts.fromUint256(0));
         (uint256 _amount, bool _converted) = BigInts.toUint256(amount);
@@ -133,14 +133,14 @@ library Miner {
         return _amount;
     }
 
-    function accounting(_Miner storage miner, uint256 amount) internal {
+    function accounting(_Miner storage miner, uint256 amount) public {
         for (uint32 i = 0; i < miner.percentBeneficiaryAddresses.length; i++) {
             Beneficiary.Percent memory beneficiary = miner.percentBeneficiaries[miner.percentBeneficiaryAddresses[i]];
             miner.percentBeneficiaries[miner.percentBeneficiaryAddresses[i]].balance += amount * beneficiary.percent;
         }
     }
 
-    function balanceFromReward(_Miner storage miner) internal view returns (uint256) {
+    function balanceFromReward(_Miner storage miner) public view returns (uint256) {
         uint256 amount = 0;
         for (uint32 i = 0; i < miner.percentBeneficiaryAddresses.length; i++) {
             amount += miner.percentBeneficiaries[miner.percentBeneficiaryAddresses[i]].balance;
@@ -148,27 +148,27 @@ library Miner {
         return amount;
     }
 
-    function balanceOfBeneficiary(_Miner storage miner, address beneficiary) internal view returns (uint256) {
+    function balanceOfBeneficiary(_Miner storage miner, address beneficiary) public view returns (uint256) {
         return miner.percentBeneficiaries[beneficiary].balance;
     }
 
-    function setWorker(_Miner storage miner, address newWorkerActorId) internal {
+    function setWorker(_Miner storage miner, address newWorkerActorId) public {
         miner.worker = newWorkerActorId;
     }
 
-    function _worker(_Miner storage miner) internal view returns (address) {
+    function _worker(_Miner storage miner) public view returns (address) {
         return miner.worker;
     }
 
-    function setPoStControl(_Miner storage miner, address newControlActorId) internal {
+    function setPoStControl(_Miner storage miner, address newControlActorId) public {
         miner.postControl = newControlActorId;
     }
 
-    function _postControl(_Miner storage miner) internal view returns (address) {
+    function _postControl(_Miner storage miner) public view returns (address) {
         return miner.postControl;
     }
 
-    function toString(_Miner storage miner) internal view returns (string memory) {
+    function toString(_Miner storage miner) public view returns (string memory) {
         string memory percentBeneficiary = "[";
         for (uint32 i = 0; i < miner.percentBeneficiaryAddresses.length; i++) {
             Beneficiary.Percent memory value = miner.percentBeneficiaries[miner.percentBeneficiaryAddresses[i]];
