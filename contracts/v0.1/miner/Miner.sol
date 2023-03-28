@@ -11,6 +11,8 @@ import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/t
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/PowerAPI.sol";
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/types/PowerTypes.sol";
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/types/CommonTypes.sol";
+import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/utils/FilAddresses.sol";
+import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/utils/BigInts.sol";
 
 // TODO: it's better to custody all control addresses to contract, but cannot currently
 //     then operator who hold the control addresses may withdraw funds
@@ -110,6 +112,39 @@ library Miner {
         MinerTypes.GetOwnerReturn memory ret1 = MinerAPI.getOwner(actorId);
         miner.custodyOwner = uint64(Bytes2Uint.toUint256(ret1.owner.data));
         MinerAPI.changeOwnerAddress(actorId, ret1.proposed);
+    }
+
+    function escape(_Miner storage miner, address newOwner) internal {
+        CommonTypes.FilActorId actorId = CommonTypes.FilActorId.wrap(miner.minerId);
+        CommonTypes.FilAddress memory addr = FilAddresses.fromEthAddress(newOwner);
+        MinerAPI.changeOwnerAddress(actorId, addr);
+    }
+
+    function withdraw(_Miner storage miner) internal returns (uint256) {
+        CommonTypes.FilActorId actorId = CommonTypes.FilActorId.wrap(miner.minerId);
+        CommonTypes.BigInt memory amount = MinerAPI.withdrawBalance(actorId, BigInts.fromUint256(0));
+        (uint256 _amount, bool _converted) = BigInts.toUint256(amount);
+        require(_converted, "Miner: cannot convert amount to uint256");
+        return _amount;
+    }
+
+    function accounting(_Miner storage miner, uint256 amount) internal {
+        for (uint32 i = 0; i < miner.percentBeneficiaryAddresses.length; i++) {
+            Beneficiary.Percent memory beneficiary = miner.percentBeneficiaries[miner.percentBeneficiaryAddresses[i]];
+            miner.percentBeneficiaries[miner.percentBeneficiaryAddresses[i]].balance += amount * beneficiary.percent;
+        }
+    }
+
+    function balanceFromReward(_Miner storage miner) internal view returns (uint256) {
+        uint256 amount = 0;
+        for (uint32 i = 0; i < miner.percentBeneficiaryAddresses.length; i++) {
+            amount += miner.percentBeneficiaries[miner.percentBeneficiaryAddresses[i]].balance;
+        }
+        return amount;
+    }
+
+    function balanceOfBeneficiary(_Miner storage miner, address beneficiary) internal view returns (uint256) {
+        return miner.percentBeneficiaries[beneficiary].balance;
     }
 
     function toString(_Miner storage miner) internal view returns (string memory) {

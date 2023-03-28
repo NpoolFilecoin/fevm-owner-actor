@@ -82,6 +82,7 @@ contract Controllable {
         require(_addingControllers[controller] == 0, "Controllable: address is adding");
         require(_deletingControllers[controller] == 0, "Controllable: address is deleting");
         require(!_deletingApprovers[controller][msgSender], "Controllable: sender already approved");
+        require(_controllers_count > 1, "Controllable: only one controller exist");
         _deletingControllers[controller] += 1;
         _deletingApprovers[controller][msgSender] = true;
         __deletingApprovers[controller].push(msgSender);

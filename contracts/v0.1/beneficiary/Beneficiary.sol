@@ -8,6 +8,7 @@ library Beneficiary {
     struct Percent {
         address beneficiary;
         uint8 percent;
+        uint256 balance;
     }
 
     /// @title Beneficiary caculated by deposited amount definition
@@ -15,5 +16,6 @@ library Beneficiary {
     struct Amount {
         address beneficiary;
         uint256 amount;
+        uint256 balance;
     }
 }

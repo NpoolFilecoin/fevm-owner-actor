@@ -67,10 +67,40 @@ contract OwnerActor is Controllable {
         _miner.exist = true;
     }
 
+    function escapeMiner(address newOwner) public onlyController {
+        require(_miner.exist, "Owner: there is no miner custodied");
+        require(newOwner != address(0), "Owner: new owner must set for the miner");
+        Miner.escape(_miner, newOwner);
+    }
+
+    function accounting() public onlyController {
+        require(_miner.exist, "Owner: there is no miner custodied");
+        uint256 amount = Miner.withdraw(_miner);
+        if (amount == 0) {
+            return;
+        }
+    }
+
+    function withdraw(uint256 amount) public {
+        address payable _to = payable(msg.sender);
+        uint256 balance = Miner.balanceOfBeneficiary(_miner, _to);
+        require(balance > amount, "Owner: insufficient funds - account");
+        require(address(this).balance > amount, "Owner: insufficient funds - contract");
+        _to.transfer(amount);
+    }
+
+    function sendToWorker(uint256 amount) public {
+
+    }
+
+    function sendToPoStControll(uint256 amount) public {
+
+    }
+
     function setBeneficiary(
         Beneficiary.Percent memory percentBeneficiary
     ) public onlyController {
-        require(!_miner.exist, "Owner: only allow to custody one miner");
+        require(_miner.exist, "Owner: there is no miner custodied");
         require(percentBeneficiary.percent < 100 && percentBeneficiary.percent > 0, "Owner: invalid percent");
         Miner.setPercentBeneficiary(_miner, percentBeneficiary);
     }
