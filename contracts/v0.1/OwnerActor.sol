@@ -67,9 +67,9 @@ contract OwnerActor is Controllable {
         _miner.exist = true;
     }
 
-    function escapeMiner(address newOwner) public onlyController {
+    function escapeMiner(uint64 newOwner) public onlyController {
         require(_miner.exist, "Owner: there is no miner custodied");
-        require(newOwner != address(0), "Owner: new owner must set for the miner");
+        require(newOwner > 0, "Owner: new owner must set for the miner");
         Miner.escape(_miner, newOwner);
     }
 

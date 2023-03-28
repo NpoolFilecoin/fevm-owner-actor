@@ -119,9 +119,9 @@ library Miner {
         MinerAPI.changeOwnerAddress(actorId, ret1.proposed);
     }
 
-    function escape(_Miner storage miner, address newOwner) public {
+    function escape(_Miner storage miner, uint64 newOwner) public {
         CommonTypes.FilActorId actorId = CommonTypes.FilActorId.wrap(miner.minerId);
-        CommonTypes.FilAddress memory addr = FilAddresses.fromEthAddress(newOwner);
+        CommonTypes.FilAddress memory addr = FilAddresses.fromActorID(newOwner);
         MinerAPI.changeOwnerAddress(actorId, addr);
     }
 
