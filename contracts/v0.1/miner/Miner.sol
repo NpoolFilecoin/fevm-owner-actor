@@ -34,6 +34,11 @@ library Miner {
         mapping(address => Beneficiary.Percent) percentBeneficiaries;
         address[] percentBeneficiaryAddresses;
         uint64 custodyOwner;
+
+        // TODO: this two should be got from miner but we cannot get it now
+        address worker;
+        address postControl;
+
         bool exist;
     }
 
@@ -145,6 +150,22 @@ library Miner {
 
     function balanceOfBeneficiary(_Miner storage miner, address beneficiary) internal view returns (uint256) {
         return miner.percentBeneficiaries[beneficiary].balance;
+    }
+
+    function setWorker(_Miner storage miner, address newWorkerActorId) internal {
+        miner.worker = newWorkerActorId;
+    }
+
+    function _worker(_Miner storage miner) internal view returns (address) {
+        return miner.worker;
+    }
+
+    function setPoStControl(_Miner storage miner, address newControlActorId) internal {
+        miner.postControl = newControlActorId;
+    }
+
+    function _postControl(_Miner storage miner) internal view returns (address) {
+        return miner.postControl;
     }
 
     function toString(_Miner storage miner) internal view returns (string memory) {

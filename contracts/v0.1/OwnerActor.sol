@@ -81,6 +81,18 @@ contract OwnerActor is Controllable {
         }
     }
 
+    function setWorker(address newWorkerActorId) public onlyController {
+        require(_miner.exist, "Owner: there is no miner custodied");
+        require(newWorkerActorId != address(0), "Owner: invalid actor id");
+        Miner.setWorker(_miner, newWorkerActorId);
+    }
+
+    function setPoStControl(address newControlActorId) public onlyController {
+        require(_miner.exist, "Owner: there is no miner custodied");
+        require(newControlActorId != address(0), "Owner: invalid actor id");
+        Miner.setPoStControl(_miner, newControlActorId);
+    }
+
     function withdraw(uint256 amount) public {
         address payable _to = payable(msg.sender);
         uint256 balance = Miner.balanceOfBeneficiary(_miner, _to);
@@ -89,12 +101,20 @@ contract OwnerActor is Controllable {
         _to.transfer(amount);
     }
 
-    function sendToWorker(uint256 amount) public {
-
+    function sendToWorker(uint256 amount) public onlyController {
+        require(_miner.exist, "Owner: there is no miner custodied");
+        address payable worker = payable(Miner._worker(_miner));
+        require(worker != address(0), "Owner: invalid worker");
+        require(address(this).balance > amount, "Owner: insufficient funds - contract");
+        worker.transfer(amount);
     }
 
-    function sendToPoStControll(uint256 amount) public {
-
+    function sendToPoStControl(uint256 amount) public onlyController {
+        require(_miner.exist, "Owner: there is no miner custodied");
+        address payable postControl = payable(Miner._postControl(_miner));
+        require(postControl != address(0), "Owner: invalid PoSt control");
+        require(address(this).balance > amount, "Owner: insufficient funds - contract");
+        postControl.transfer(amount);
     }
 
     function setBeneficiary(
