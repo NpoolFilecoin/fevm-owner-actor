@@ -144,6 +144,7 @@ library Miner {
 
         miner.vestingAmount = 0;
         uint256 lastVestingEndAmount = 0;
+        CommonTypes.ChainEpoch lastVestingEndEpoch = miner.vestingEndEpoch;
 
         for (uint32 i = 0; i < vestings.vesting_funds.length; i++) {
             MinerTypes.VestingFunds memory vesting = vestings.vesting_funds[i];
@@ -151,7 +152,7 @@ library Miner {
             require(_converted, "Miner: cannot convert amount to uint256");
             miner.vestingAmount += _amount;
             miner.vestingEndEpoch = vesting.epoch;
-            if (CommonTypes.ChainEpoch.unwrap(miner.vestingEndEpoch) <= CommonTypes.ChainEpoch.unwrap(vesting.epoch)) {
+            if (CommonTypes.ChainEpoch.unwrap(vesting.epoch) <= CommonTypes.ChainEpoch.unwrap(lastVestingEndEpoch)) {
                 lastVestingEndAmount += _amount;
             }
         }
