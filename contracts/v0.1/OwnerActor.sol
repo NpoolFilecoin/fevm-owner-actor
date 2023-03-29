@@ -65,10 +65,12 @@ contract OwnerActor is Controllable {
         _miner.exist = true;
     }
 
+    /// @notice Dangerous, we should only allow escape to the owner of caller, but f4 address cannot be a owner, and f3 address cannot be a metamask caller
     function escapeMiner(uint64 newOwner) public onlyController {
         require(_miner.exist, "Owner: there is no miner custodied");
         require(newOwner > 0, "Owner: new owner must set for the miner");
         Miner.escape(_miner, newOwner);
+        _miner.exist = false;
     }
 
     function accounting() public onlyController {
