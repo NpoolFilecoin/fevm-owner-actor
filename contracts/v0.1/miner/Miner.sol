@@ -36,8 +36,8 @@ library Miner {
         uint64 custodyOwner;
 
         // TODO: this two should be got from miner but we cannot get it now
-        address worker;
-        address postControl;
+        uint64 worker;
+        uint64 postControl;
 
         bool exist;
     }
@@ -119,9 +119,9 @@ library Miner {
         MinerAPI.changeOwnerAddress(actorId, ret1.proposed);
     }
 
-    function escape(_Miner storage miner, address newOwner) public {
+    function escape(_Miner storage miner, uint64 newOwner) public {
         CommonTypes.FilActorId actorId = CommonTypes.FilActorId.wrap(miner.minerId);
-        CommonTypes.FilAddress memory addr = FilAddresses.fromEthAddress(newOwner);
+        CommonTypes.FilAddress memory addr = FilAddresses.fromActorID(newOwner);
         MinerAPI.changeOwnerAddress(actorId, addr);
     }
 
@@ -133,6 +133,10 @@ library Miner {
         return _amount;
     }
 
+    function withdrawReward(_Miner storage miner, address beneficiary, uint256 amount) public {
+        miner.percentBeneficiaries[beneficiary].balance -= amount;
+    }
+
     function accounting(_Miner storage miner, uint256 amount) public {
         for (uint32 i = 0; i < miner.percentBeneficiaryAddresses.length; i++) {
             Beneficiary.Percent memory beneficiary = miner.percentBeneficiaries[miner.percentBeneficiaryAddresses[i]];
@@ -140,7 +144,7 @@ library Miner {
         }
     }
 
-    function balanceFromReward(_Miner storage miner) public view returns (uint256) {
+    function balanceOfReward(_Miner storage miner) public view returns (uint256) {
         uint256 amount = 0;
         for (uint32 i = 0; i < miner.percentBeneficiaryAddresses.length; i++) {
             amount += miner.percentBeneficiaries[miner.percentBeneficiaryAddresses[i]].balance;
@@ -152,19 +156,19 @@ library Miner {
         return miner.percentBeneficiaries[beneficiary].balance;
     }
 
-    function setWorker(_Miner storage miner, address newWorkerActorId) public {
+    function setWorker(_Miner storage miner, uint64 newWorkerActorId) public {
         miner.worker = newWorkerActorId;
     }
 
-    function _worker(_Miner storage miner) public view returns (address) {
+    function _worker(_Miner storage miner) public view returns (uint64) {
         return miner.worker;
     }
 
-    function setPoStControl(_Miner storage miner, address newControlActorId) public {
+    function setPoStControl(_Miner storage miner, uint64 newControlActorId) public {
         miner.postControl = newControlActorId;
     }
 
-    function _postControl(_Miner storage miner) public view returns (address) {
+    function _postControl(_Miner storage miner) public view returns (uint64) {
         return miner.postControl;
     }
 
