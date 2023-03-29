@@ -144,7 +144,7 @@ library Miner {
         }
     }
 
-    function balanceFromReward(_Miner storage miner) public view returns (uint256) {
+    function balanceOfReward(_Miner storage miner) public view returns (uint256) {
         uint256 amount = 0;
         for (uint32 i = 0; i < miner.percentBeneficiaryAddresses.length; i++) {
             amount += miner.percentBeneficiaries[miner.percentBeneficiaryAddresses[i]].balance;

@@ -105,7 +105,8 @@ contract OwnerActor is Controllable {
         require(_miner.exist, "Owner: there is no miner custodied");
         uint64 worker = Miner._worker(_miner);
         require(worker > 0, "Owner: invalid worker");
-        require(address(this).balance > amount, "Owner: insufficient funds - contract");
+        uint256 balance = Miner.balanceOfReward(_miner);
+        require(address(this).balance - balance > amount, "Owner: insufficient funds - contract");
         Send.send(worker, amount);
     }
 
@@ -113,7 +114,8 @@ contract OwnerActor is Controllable {
         require(_miner.exist, "Owner: there is no miner custodied");
         uint64 postControl = Miner._postControl(_miner);
         require(postControl > 0, "Owner: invalid PoSt control");
-        require(address(this).balance > amount, "Owner: insufficient funds - contract");
+        uint256 balance = Miner.balanceOfReward(_miner);
+        require(address(this).balance - balance > amount, "Owner: insufficient funds - contract");
         Send.send(postControl, amount);
     }
 
