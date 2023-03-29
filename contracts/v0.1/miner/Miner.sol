@@ -127,7 +127,8 @@ library Miner {
 
     function withdraw(_Miner storage miner) public returns (uint256) {
         CommonTypes.FilActorId actorId = CommonTypes.FilActorId.wrap(miner.minerId);
-        CommonTypes.BigInt memory amount = MinerAPI.withdrawBalance(actorId, BigInts.fromUint256(0));
+        CommonTypes.BigInt memory balance = MinerAPI.getAvailableBalance(actorId);
+        CommonTypes.BigInt memory amount = MinerAPI.withdrawBalance(actorId, balance);
         (uint256 _amount, bool _converted) = BigInts.toUint256(amount);
         require(_converted, "Miner: cannot convert amount to uint256");
         return _amount;
@@ -216,6 +217,12 @@ library Miner {
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"InitialAvailable\":\"")));
         minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(uint256(miner.initialAvailable)))));
+
+        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"Worker\":\"t0")));
+        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(uint256(miner.worker)))));
+
+        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"PostControl\":\"t0")));
+        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(uint256(miner.postControl)))));
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"InitialCollateral\":\"")));
         minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.initialRawPower))));
