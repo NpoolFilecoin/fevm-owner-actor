@@ -39,6 +39,9 @@ library Miner {
         uint64 worker;
         uint64 postControl;
 
+        uint256 vestingAmount;
+        CommonTypes.ChainEpoch vestingEndEpoch;
+
         bool exist;
     }
 
@@ -128,10 +131,32 @@ library Miner {
     function withdraw(_Miner storage miner) public returns (uint256) {
         CommonTypes.FilActorId actorId = CommonTypes.FilActorId.wrap(miner.minerId);
         CommonTypes.BigInt memory balance = MinerAPI.getAvailableBalance(actorId);
-        CommonTypes.BigInt memory amount = MinerAPI.withdrawBalance(actorId, balance);
-        (uint256 _amount, bool _converted) = BigInts.toUint256(amount);
-        require(_converted, "Miner: cannot convert amount to uint256");
-        return _amount;
+        MinerAPI.withdrawBalance(actorId, balance);
+
+        uint256 lastVestingAmount = miner.vestingAmount;
+
+        MinerTypes.GetVestingFundsReturn memory vestings = MinerAPI.getVestingFunds(actorId);
+        if (vestings.vesting_funds.length == 0) {
+            miner.vestingAmount = 0;
+            miner.vestingEndEpoch = CommonTypes.ChainEpoch.wrap(0);
+            return lastVestingAmount;
+        }
+
+        miner.vestingAmount = 0;
+        uint256 lastVestingEndAmount = 0;
+
+        for (uint32 i = 0; i < vestings.vesting_funds.length; i++) {
+            MinerTypes.VestingFunds memory vesting = vestings.vesting_funds[i];
+            (uint256 _amount, bool _converted) = BigInts.toUint256(vesting.amount);
+            require(_converted, "Miner: cannot convert amount to uint256");
+            miner.vestingAmount += _amount;
+            miner.vestingEndEpoch = vesting.epoch;
+            if (CommonTypes.ChainEpoch.unwrap(miner.vestingEndEpoch) <= CommonTypes.ChainEpoch.unwrap(vesting.epoch)) {
+                lastVestingEndAmount += _amount;
+            }
+        }
+
+        return lastVestingAmount - lastVestingEndAmount;
     }
 
     function withdrawReward(_Miner storage miner, address beneficiary, uint256 amount) public {
