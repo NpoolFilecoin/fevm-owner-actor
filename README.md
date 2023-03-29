@@ -32,13 +32,14 @@ Of course, Peggy contract should be able to act as owner account, record deposit
 - escapeMiner ```Code``` &#x2705; ```Test``` &#x2705;
 - setWorker ```Code``` &#x2705; ```Test``` &#x2705;
 - setPoStControl ```Code``` &#x2705; ```Test``` &#x231B;
-- withdraw ```Code``` &#x2705; ```Test``` &#x231B;
 - accounting ```Code``` &#x2705; ```Test``` &#x231B;
 - sendToWorker ```Code``` &#x2705; ```Test``` &#x2705;
 - sendToPoStControl ```Code``` &#x2705; ```Test``` &#x231B;
 
 ### Beneficiary APIs
 - setBeneficiary ```Code``` &#x2705; ```Test``` &#x2705;
+- redeem ```Code``` &#x2705; ```Test``` &#x231B;
+- withdraw ```Code``` &#x2705; ```Test``` &#x231B;
 
 ### Smart Contract Controller APIs
 - addController ```Code``` &#x2705; ```Test``` &#x231B;
