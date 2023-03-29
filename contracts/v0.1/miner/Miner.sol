@@ -92,7 +92,7 @@ library Miner {
         Beneficiary.Percent memory beneficiary
     ) public {
         Beneficiary.Percent memory oldBeneficiary = miner.percentBeneficiaries[beneficiary.beneficiary];
-        uint8 newPercent = oldBeneficiary.percent + beneficiary.percent;
+        uint8 newPercent = beneficiary.percent;
         require(newPercent < 100, "Miner: invalid percent");
 
         bool exist = false;
@@ -104,13 +104,13 @@ library Miner {
                 continue;
             }
             miner.percentBeneficiaries[_beneficiary].percent *= (100 - newPercent);
-            miner.percentBeneficiaries[_beneficiary].percent /= 100;
+            miner.percentBeneficiaries[_beneficiary].percent /= (100 - oldBeneficiary.percent);
         }
 
         miner.percentBeneficiaries[beneficiary.beneficiary].beneficiary = beneficiary.beneficiary;
         miner.percentBeneficiaries[beneficiary.beneficiary].percent = beneficiary.percent;
 
-        if (exist) {
+        if (!exist) {
             miner.percentBeneficiaryAddresses.push(beneficiary.beneficiary);
         }
     }
