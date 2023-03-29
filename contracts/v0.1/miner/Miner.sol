@@ -83,6 +83,7 @@ library Miner {
             require(beneficiary.percent < 100 && beneficiary.percent > 0, "Miner: invalid percent");
             miner.percentBeneficiaries[beneficiary.beneficiary].beneficiary = beneficiary.beneficiary;
             miner.percentBeneficiaries[beneficiary.beneficiary].percent = beneficiary.percent;
+            miner.percentBeneficiaries[beneficiary.beneficiary].staking = beneficiary.staking;
             miner.percentBeneficiaryAddresses.push(beneficiary.beneficiary);
         }
     }
@@ -108,6 +109,7 @@ library Miner {
 
         miner.percentBeneficiaries[beneficiary.beneficiary].beneficiary = beneficiary.beneficiary;
         miner.percentBeneficiaries[beneficiary.beneficiary].percent = beneficiary.percent;
+        miner.percentBeneficiaries[beneficiary.beneficiary].staking = beneficiary.staking;
 
         if (!exist) {
             miner.percentBeneficiaryAddresses.push(beneficiary.beneficiary);
