@@ -36,8 +36,8 @@ library Miner {
         uint64 custodyOwner;
 
         // TODO: this two should be got from miner but we cannot get it now
-        address worker;
-        address postControl;
+        uint64 worker;
+        uint64 postControl;
 
         bool exist;
     }
@@ -156,19 +156,19 @@ library Miner {
         return miner.percentBeneficiaries[beneficiary].balance;
     }
 
-    function setWorker(_Miner storage miner, address newWorkerActorId) public {
+    function setWorker(_Miner storage miner, uint64 newWorkerActorId) public {
         miner.worker = newWorkerActorId;
     }
 
-    function _worker(_Miner storage miner) public view returns (address) {
+    function _worker(_Miner storage miner) public view returns (uint64) {
         return miner.worker;
     }
 
-    function setPoStControl(_Miner storage miner, address newControlActorId) public {
+    function setPoStControl(_Miner storage miner, uint64 newControlActorId) public {
         miner.postControl = newControlActorId;
     }
 
-    function _postControl(_Miner storage miner) public view returns (address) {
+    function _postControl(_Miner storage miner) public view returns (uint64) {
         return miner.postControl;
     }
 

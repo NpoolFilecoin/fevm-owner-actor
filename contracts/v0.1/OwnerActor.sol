@@ -4,9 +4,7 @@ pragma solidity ^0.8.17;
 import "./controller/Controllable.sol";
 import "./miner/Miner.sol";
 import "./beneficiary/Beneficiary.sol";
-
-// import "https://github.com/Zondax/filecoin-solidity/blob/v4.0.2/contracts/v0.8/PowerAPI.sol";
-// import "https://github.com/Zondax/filecoin-solidity/blob/v4.0.2/contracts/v0.8/types/PowerTypes.sol";
+import "./send/Send.sol";
 
 // TODO: we cannot detect method 0 within runtime contract
 //     so we have to let a genesis account to record the deposit
@@ -82,15 +80,15 @@ contract OwnerActor is Controllable {
         Miner.accounting(_miner, amount);
     }
 
-    function setWorker(address newWorkerActorId) public onlyController {
+    function setWorker(uint64 newWorkerActorId) public onlyController {
         require(_miner.exist, "Owner: there is no miner custodied");
-        require(newWorkerActorId != address(0), "Owner: invalid actor id");
+        require(newWorkerActorId > 0, "Owner: invalid actor id");
         Miner.setWorker(_miner, newWorkerActorId);
     }
 
-    function setPoStControl(address newControlActorId) public onlyController {
+    function setPoStControl(uint64 newControlActorId) public onlyController {
         require(_miner.exist, "Owner: there is no miner custodied");
-        require(newControlActorId != address(0), "Owner: invalid actor id");
+        require(newControlActorId > 0, "Owner: invalid actor id");
         Miner.setPoStControl(_miner, newControlActorId);
     }
 
@@ -105,18 +103,18 @@ contract OwnerActor is Controllable {
 
     function sendToWorker(uint256 amount) public onlyController {
         require(_miner.exist, "Owner: there is no miner custodied");
-        address payable worker = payable(Miner._worker(_miner));
-        require(worker != address(0), "Owner: invalid worker");
+        uint64 worker = Miner._worker(_miner);
+        require(worker > 0, "Owner: invalid worker");
         require(address(this).balance > amount, "Owner: insufficient funds - contract");
-        worker.transfer(amount);
+        Send.send(worker, amount);
     }
 
     function sendToPoStControl(uint256 amount) public onlyController {
         require(_miner.exist, "Owner: there is no miner custodied");
-        address payable postControl = payable(Miner._postControl(_miner));
-        require(postControl != address(0), "Owner: invalid PoSt control");
+        uint64 postControl = Miner._postControl(_miner);
+        require(postControl > 0, "Owner: invalid PoSt control");
         require(address(this).balance > amount, "Owner: insufficient funds - contract");
-        postControl.transfer(amount);
+        Send.send(postControl, amount);
     }
 
     function setBeneficiary(
