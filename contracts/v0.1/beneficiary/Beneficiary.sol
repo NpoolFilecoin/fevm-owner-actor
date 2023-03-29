@@ -9,13 +9,6 @@ library Beneficiary {
         address beneficiary;
         uint8 percent;
         uint256 balance;
-    }
-
-    /// @title Beneficiary caculated by deposited amount definition
-    /// @author web3eye.io
-    struct Amount {
-        address beneficiary;
-        uint256 amount;
-        uint256 balance;
+        uint256 staking;
     }
 }

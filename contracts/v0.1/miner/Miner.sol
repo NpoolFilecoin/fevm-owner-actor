@@ -163,6 +163,10 @@ library Miner {
         miner.percentBeneficiaries[beneficiary].balance -= amount;
     }
 
+    function redeem(_Miner storage miner, address beneficiary, uint256 amount) public {
+        miner.percentBeneficiaries[beneficiary].staking -= amount;
+    }
+
     function accounting(_Miner storage miner, uint256 amount) public {
         for (uint32 i = 0; i < miner.percentBeneficiaryAddresses.length; i++) {
             Beneficiary.Percent memory beneficiary = miner.percentBeneficiaries[miner.percentBeneficiaryAddresses[i]];
@@ -180,6 +184,10 @@ library Miner {
 
     function balanceOfBeneficiary(_Miner storage miner, address beneficiary) public view returns (uint256) {
         return miner.percentBeneficiaries[beneficiary].balance;
+    }
+
+    function stakingOfBeneficiary(_Miner storage miner, address beneficiary) public view returns (uint256) {
+        return miner.percentBeneficiaries[beneficiary].staking;
     }
 
     function setWorker(_Miner storage miner, uint64 newWorkerActorId) public {

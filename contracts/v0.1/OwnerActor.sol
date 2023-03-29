@@ -103,6 +103,15 @@ contract OwnerActor is Controllable {
         Miner.withdrawReward(_miner, _to, amount);
     }
 
+    function redeem(uint256 amount) public {
+        address payable _to = payable(msg.sender);
+        uint256 staking = Miner.stakingOfBeneficiary(_miner, _to);
+        require(staking > amount, "Owner: insufficient funds - account");
+        require(address(this).balance > amount, "Owner: insufficient funds - contract");
+        _to.transfer(amount);
+        Miner.redeem(_miner, _to, amount);
+    }
+
     function sendToWorker(uint256 amount) public onlyController {
         require(_miner.exist, "Owner: there is no miner custodied");
         uint64 worker = Miner._worker(_miner);
