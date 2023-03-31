@@ -94,7 +94,7 @@ library Miner {
         Beneficiary.Percent memory beneficiary
     ) public {
         Beneficiary.Percent memory oldBeneficiary = miner.percentBeneficiaries[beneficiary.beneficiary];
-        require(beneficiary.percent < 100, "Miner: invalid percent");
+        require(beneficiary.percent <= 100, "Miner: invalid percent");
 
         bool exist = false;
 
