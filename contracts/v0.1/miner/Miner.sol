@@ -13,6 +13,7 @@ import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/t
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/types/CommonTypes.sol";
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/utils/FilAddresses.sol";
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/utils/BigInts.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Strings.sol";
 
 // TODO: it's better to custody all control addresses to contract, but cannot currently
 //     then operator who hold the control addresses may withdraw funds
@@ -218,7 +219,7 @@ library Miner {
             }
 
             percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes("{\"Address\":\"")));
-            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), abi.encode(value.beneficiary)));
+            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(Strings.toHexString(uint256(uint160(value.beneficiary)), 20))));
 
             percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes("\",\"Percent\":")));
             percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(Uint2Str.toString(value.percent))));
