@@ -134,7 +134,7 @@ contract OwnerActor is Controllable {
         Beneficiary.Percent memory percentBeneficiary
     ) public onlyController {
         require(_miner.exist, "Owner: there is no miner custodied");
-        require(percentBeneficiary.percent < 100 && percentBeneficiary.percent > 0, "Owner: invalid percent");
+        require(percentBeneficiary.percent <= 100 && percentBeneficiary.percent > 0, "Owner: invalid percent");
         Miner.setPercentBeneficiary(_miner, percentBeneficiary);
     }
 }
