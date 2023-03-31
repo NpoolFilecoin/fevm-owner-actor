@@ -224,7 +224,7 @@ library Miner {
             percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes("\",\"Percent\":")));
             percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(Uint2Str.toString(value.percent))));
 
-            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes("\",\"Balance\":")));
+            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(",\"Balance\":")));
             percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(Uint2Str.toString(value.balance))));
 
             percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes("\",\"Staking\":")));
