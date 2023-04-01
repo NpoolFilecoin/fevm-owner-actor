@@ -134,6 +134,12 @@ library Miner {
         MinerAPI.changeOwnerAddress(actorId, addr);
     }
 
+    function getVestingFunds(_Miner storage miner) public returns (string memory) {
+        CommonTypes.FilActorId actorId = CommonTypes.FilActorId.wrap(miner.minerId);
+        MinerTypes.GetVestingFundsReturn memory vestings = MinerAPI.getVestingFunds(actorId);
+        return String.vestingFundsToString(vestings.vesting_funds);
+    }
+
     function withdraw(_Miner storage miner) public returns (uint256) {
         CommonTypes.FilActorId actorId = CommonTypes.FilActorId.wrap(miner.minerId);
         CommonTypes.BigInt memory balance = MinerAPI.getAvailableBalance(actorId);
@@ -177,7 +183,9 @@ library Miner {
     function accounting(_Miner storage miner, uint256 amount) public {
         for (uint32 i = 0; i < miner.percentBeneficiaryAddresses.length; i++) {
             Beneficiary.Percent memory beneficiary = miner.percentBeneficiaries[miner.percentBeneficiaryAddresses[i]];
-            miner.percentBeneficiaries[miner.percentBeneficiaryAddresses[i]].balance += amount * beneficiary.percent / 100;
+            uint256 _amount = amount / 100;
+            _amount *= beneficiary.percent;
+            miner.percentBeneficiaries[miner.percentBeneficiaryAddresses[i]].balance += _amount;
         }
     }
 
@@ -214,6 +222,6 @@ library Miner {
     }
 
     function toString(_Miner storage miner) public view returns (string memory) {
-        return String.toString(miner);
+        return String.minerToString(miner);
     }
 }

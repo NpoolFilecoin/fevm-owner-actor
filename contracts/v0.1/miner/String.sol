@@ -2,13 +2,16 @@
 pragma solidity = 0.8.17;
 
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Strings.sol";
+import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/types/MinerTypes.sol";
+import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/utils/BigInts.sol";
+import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/types/CommonTypes.sol";
 import "../fvm/Types.sol";
 import "../beneficiary/Beneficiary.sol";
 import "../utils/Uint2Str.sol";
 import "./Miner.sol";
 
 library String {
-    function toString(Miner._Miner storage miner) public view returns (string memory) {
+    function minerToString(Miner._Miner storage miner) public view returns (string memory) {
         string memory percentBeneficiary = "[";
         for (uint32 i = 0; i < miner.percentBeneficiaryAddresses.length; i++) {
             Beneficiary.Percent memory value = miner.percentBeneficiaries[miner.percentBeneficiaryAddresses[i]];
@@ -77,5 +80,31 @@ library String {
         minerStr = string(bytes.concat(bytes(minerStr), bytes("}")));
 
         return minerStr;
+    }
+
+    function vestingFundsToString(MinerTypes.VestingFunds[] memory vestingFunds) public view returns (string memory) {
+        string memory vestingFundsStr = "[";
+
+        for (uint32 i = 0; i < vestingFunds.length; i++) {
+            MinerTypes.VestingFunds memory vesting = vestingFunds[i];
+
+            if (i > 0) {
+                vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), bytes(",")));
+            }
+
+            vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), bytes("{\"Epoch\":\"")));
+            int256 epoch = CommonTypes.ChainEpoch.unwrap(vesting.epoch);
+            vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), bytes(Strings.toString(epoch))));
+
+            vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), bytes("\",\"Amount\":")));
+            (uint256 amount, bool converted) = BigInts.toUint256(vesting.amount);
+            require(converted, "String: convert error");
+            vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), bytes(Uint2Str.toString(amount))));
+
+            vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), bytes("\"}")));
+        }
+
+        vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), bytes("]")));
+        return vestingFundsStr;
     }
 }

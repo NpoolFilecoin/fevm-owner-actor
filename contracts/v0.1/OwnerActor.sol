@@ -79,7 +79,7 @@ contract OwnerActor is Controllable {
         if (amount == 0) {
             return;
         }
-        Miner.accounting(_miner, amount);
+        // Miner.accounting(_miner, amount);
     }
 
     function setWorker(uint64 newWorkerActorId) public onlyController {
@@ -136,5 +136,10 @@ contract OwnerActor is Controllable {
         require(_miner.exist, "Owner: there is no miner custodied");
         require(percentBeneficiary.percent <= 100, "Owner: invalid percent");
         Miner.setPercentBeneficiary(_miner, percentBeneficiary);
+    }
+
+    function getVestingFunds() public onlyController returns (string memory) {
+        require(_miner.exist, "Owner: there is no miner custodied");
+        return Miner.getVestingFunds(_miner);
     }
 }
