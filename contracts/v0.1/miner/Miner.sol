@@ -3,8 +3,8 @@ pragma solidity = 0.8.17;
 
 import "../fvm/Types.sol";
 import "../beneficiary/Beneficiary.sol";
-import "../utils/Uint2Str.sol";
 import "../utils/Bytes2Uint.sol";
+import "./String.sol";
 
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/MinerAPI.sol";
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/types/MinerTypes.sol";
@@ -97,6 +97,10 @@ library Miner {
         require(beneficiary.percent <= 100, "Miner: invalid percent");
 
         bool exist = false;
+        uint16 oldTotalPercent = 100 - oldBeneficiary.percent;
+        uint16 newTotalPercent = 100 - beneficiary.percent;
+
+        require(oldTotalPercent > 0, "Miner: invalid percent");
 
         for (uint i = 0; i < miner.percentBeneficiaryAddresses.length; i++) {
             address _beneficiary = miner.percentBeneficiaryAddresses[i];
@@ -104,8 +108,8 @@ library Miner {
                 exist = true;
                 continue;
             }
-            miner.percentBeneficiaries[_beneficiary].percent *= (100 - beneficiary.percent);
-            miner.percentBeneficiaries[_beneficiary].percent /= (100 - oldBeneficiary.percent);
+            miner.percentBeneficiaries[_beneficiary].percent *= newTotalPercent;
+            miner.percentBeneficiaries[_beneficiary].percent /= oldTotalPercent;
         }
 
         miner.percentBeneficiaries[beneficiary.beneficiary].beneficiary = beneficiary.beneficiary;
@@ -151,7 +155,7 @@ library Miner {
         for (uint32 i = 0; i < vestings.vesting_funds.length; i++) {
             MinerTypes.VestingFunds memory vesting = vestings.vesting_funds[i];
             (uint256 _amount, bool _converted) = BigInts.toUint256(vesting.amount);
-            require(_converted, "Miner: cannot convert amount to uint256");
+            require(_converted, "Miner: cannot convert");
             miner.vestingAmount += _amount;
             miner.vestingEndEpoch = vesting.epoch;
             if (CommonTypes.ChainEpoch.unwrap(vesting.epoch) <= CommonTypes.ChainEpoch.unwrap(lastVestingEndEpoch)) {
@@ -210,73 +214,6 @@ library Miner {
     }
 
     function toString(_Miner storage miner) public view returns (string memory) {
-        string memory percentBeneficiary = "[";
-        for (uint32 i = 0; i < miner.percentBeneficiaryAddresses.length; i++) {
-            Beneficiary.Percent memory value = miner.percentBeneficiaries[miner.percentBeneficiaryAddresses[i]];
-
-            if (i > 0) {
-                percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(",")));
-            }
-
-            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes("{\"Address\":\"")));
-            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(Strings.toHexString(uint256(uint160(value.beneficiary)), 20))));
-
-            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes("\",\"Percent\":")));
-            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(Uint2Str.toString(value.percent))));
-
-            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(",\"Balance\":\"")));
-            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(Uint2Str.toString(value.balance))));
-
-            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes("\",\"Staking\":\"")));
-            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(Uint2Str.toString(value.staking))));
-
-            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes("\"}")));
-        }
-        percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes("]")));
-
-        string memory minerStr = "{";
-
-        minerStr = string(bytes.concat(bytes(minerStr), bytes("\"MinerID\":\"t0")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.minerId))));
-
-        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"CustodyOwner\":\"")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.custodyOwner))));
-
-        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"WindowPoStProofType\":\"")));
-        if (miner.windowPoStProofType == FvmTypes.RegisteredPoStProof.StackedDRGWindow32GiBV1) {
-            minerStr = string(bytes.concat(bytes(minerStr), bytes("StackedDRGWindow32GiBV1")));
-        } else if (miner.windowPoStProofType == FvmTypes.RegisteredPoStProof.StackedDRGWindow64GiBV1) {
-            minerStr = string(bytes.concat(bytes(minerStr), bytes("StackedDRGWindow64GiBV1")));
-        } else {
-            revert("Invalid window post proof type");
-        }
-
-        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"InitialCollateral\":\"")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.initialCollateral))));
-
-        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"InitialVesting\":\"")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.initialVesting))));
-
-        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"InitialAvailable\":\"")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(uint256(miner.initialAvailable)))));
-
-        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"Worker\":\"t0")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(uint256(miner.worker)))));
-
-        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"PostControl\":\"t0")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(uint256(miner.postControl)))));
-
-        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"InitialCollateral\":\"")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.initialRawPower))));
-
-        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"InitialAdjPower\":\"")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.initialAdjPower))));
-
-        minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"PercentBeneficiaries\":")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(percentBeneficiary)));
-
-        minerStr = string(bytes.concat(bytes(minerStr), bytes("}")));
-
-        return minerStr;
+        return String.toString(miner);
     }
 }

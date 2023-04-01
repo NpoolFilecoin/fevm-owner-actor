@@ -7,7 +7,7 @@ library Beneficiary {
     /// @author web3eye.io
     struct Percent {
         address beneficiary;
-        uint8 percent;
+        uint16 percent;
         uint256 balance;
         uint256 staking;
     }

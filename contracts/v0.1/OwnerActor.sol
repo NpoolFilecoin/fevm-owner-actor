@@ -50,7 +50,7 @@ contract OwnerActor is Controllable {
 
         uint256 totalAmount = _miner.initialCollateral;
 
-        uint8 totalPercent = 0;
+        uint16 totalPercent = 0;
         for (uint i = 0; i < percentBeneficiaries.length; i++) {
             require(percentBeneficiaries[i].percent > 0 && percentBeneficiaries[i].percent <= 100, "Owner: invalid percent");
             totalPercent += percentBeneficiaries[i].percent;
