@@ -81,7 +81,7 @@ library Miner {
     ) public {
         for (uint i = 0; i < beneficiaries.length; i++) {
             Beneficiary.Percent memory beneficiary = beneficiaries[i];
-            require(beneficiary.percent < 100 && beneficiary.percent > 0, "Miner: invalid percent");
+            require(beneficiary.percent <= 100 && beneficiary.percent > 0, "Miner: invalid percent");
             miner.percentBeneficiaries[beneficiary.beneficiary].beneficiary = beneficiary.beneficiary;
             miner.percentBeneficiaries[beneficiary.beneficiary].percent = beneficiary.percent;
             miner.percentBeneficiaries[beneficiary.beneficiary].staking = beneficiary.staking;
@@ -177,7 +177,7 @@ library Miner {
     function accounting(_Miner storage miner, uint256 amount) public {
         for (uint32 i = 0; i < miner.percentBeneficiaryAddresses.length; i++) {
             Beneficiary.Percent memory beneficiary = miner.percentBeneficiaries[miner.percentBeneficiaryAddresses[i]];
-            miner.percentBeneficiaries[miner.percentBeneficiaryAddresses[i]].balance += amount * beneficiary.percent;
+            miner.percentBeneficiaries[miner.percentBeneficiaryAddresses[i]].balance += amount * beneficiary.percent / 100;
         }
     }
 
