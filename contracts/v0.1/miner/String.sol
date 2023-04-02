@@ -81,7 +81,7 @@ library String {
         return minerStr;
     }
 
-    function vestingFundsToString(MinerTypes.VestingFunds[] memory vestingFunds) public pure returns (string memory) {
+    function vestingFundsToString(MinerTypes.VestingFunds[] memory vestingFunds) public view returns (string memory) {
         string memory vestingFundsStr = "[";
 
         for (uint32 i = 0; i < vestingFunds.length; i++) {
@@ -95,12 +95,19 @@ library String {
             int256 epoch = CommonTypes.ChainEpoch.unwrap(vesting.epoch);
             vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), bytes(Strings.toString(epoch))));
 
-            /*
-            vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), bytes("\",\"Amount\":")));
-            (uint256 amount, bool converted) = BigInts.toUint256(vesting.amount);
-            require(converted, "String: convert error");
+            vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), bytes("\",\"Uint256Amount\":")));
+            (int256 amount, bool overflow) = BigInts.toInt256(vesting.amount);
             vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), bytes(Strings.toString(amount))));
-            */
+
+            vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), bytes("\",\"Overflow\":")));
+            if (overflow) {
+                vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), bytes("true")));
+            } else {
+                vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), bytes("false")));
+            }
+
+            vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), bytes("\",\"BytesAmount\":")));
+            vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), vesting.amount.val));
 
             vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), bytes("\"}")));
         }

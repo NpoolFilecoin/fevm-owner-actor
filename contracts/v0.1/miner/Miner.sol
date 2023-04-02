@@ -167,8 +167,8 @@ library Miner {
 
         for (uint32 i = 0; i < vestings.vesting_funds.length; i++) {
             MinerTypes.VestingFunds memory vesting = vestings.vesting_funds[i];
-            (uint256 _amount, bool _converted) = BigInts.toUint256(vesting.amount);
-            require(_converted, "Miner: cannot convert");
+            (uint256 _amount, bool _overflow) = BigInts.toUint256(vesting.amount);
+            require(!_overflow, "Miner: cannot convert");
             miner.vestingAmount += _amount;
             miner.vestingEndEpoch = vesting.epoch;
             if (CommonTypes.ChainEpoch.unwrap(vesting.epoch) <= CommonTypes.ChainEpoch.unwrap(lastVestingEndEpoch)) {
