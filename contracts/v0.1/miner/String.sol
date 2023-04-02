@@ -7,7 +7,6 @@ import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/u
 import "https://github.com/Zondax/filecoin-solidity/blob/master/contracts/v0.8/types/CommonTypes.sol";
 import "../fvm/Types.sol";
 import "../beneficiary/Beneficiary.sol";
-import "../utils/Uint2Str.sol";
 import "./Miner.sol";
 
 library String {
@@ -24,13 +23,13 @@ library String {
             percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(Strings.toHexString(uint256(uint160(value.beneficiary)), 20))));
 
             percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes("\",\"Percent\":")));
-            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(Uint2Str.toString(value.percent))));
+            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(Strings.toString(value.percent))));
 
             percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(",\"Balance\":\"")));
-            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(Uint2Str.toString(value.balance))));
+            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(Strings.toString(value.balance))));
 
             percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes("\",\"Staking\":\"")));
-            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(Uint2Str.toString(value.staking))));
+            percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes(Strings.toString(value.staking))));
 
             percentBeneficiary = string(bytes.concat(bytes(percentBeneficiary), bytes("\"}")));
         }
@@ -39,10 +38,10 @@ library String {
         string memory minerStr = "{";
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\"MinerID\":\"t0")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.minerId))));
+        minerStr = string(bytes.concat(bytes(minerStr), bytes(Strings.toString(miner.minerId))));
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"CustodyOwner\":\"")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.custodyOwner))));
+        minerStr = string(bytes.concat(bytes(minerStr), bytes(Strings.toString(miner.custodyOwner))));
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"WindowPoStProofType\":\"")));
         if (miner.windowPoStProofType == FvmTypes.RegisteredPoStProof.StackedDRGWindow32GiBV1) {
@@ -54,25 +53,25 @@ library String {
         }
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"InitialCollateral\":\"")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.initialCollateral))));
+        minerStr = string(bytes.concat(bytes(minerStr), bytes(Strings.toString(miner.initialCollateral))));
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"InitialVesting\":\"")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.initialVesting))));
+        minerStr = string(bytes.concat(bytes(minerStr), bytes(Strings.toString(miner.initialVesting))));
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"InitialAvailable\":\"")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(uint256(miner.initialAvailable)))));
+        minerStr = string(bytes.concat(bytes(minerStr), bytes(Strings.toString(uint256(miner.initialAvailable)))));
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"Worker\":\"t0")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(uint256(miner.worker)))));
+        minerStr = string(bytes.concat(bytes(minerStr), bytes(Strings.toString(uint256(miner.worker)))));
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"PostControl\":\"t0")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(uint256(miner.postControl)))));
+        minerStr = string(bytes.concat(bytes(minerStr), bytes(Strings.toString(uint256(miner.postControl)))));
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"InitialCollateral\":\"")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.initialRawPower))));
+        minerStr = string(bytes.concat(bytes(minerStr), bytes(Strings.toString(miner.initialRawPower))));
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"InitialAdjPower\":\"")));
-        minerStr = string(bytes.concat(bytes(minerStr), bytes(Uint2Str.toString(miner.initialAdjPower))));
+        minerStr = string(bytes.concat(bytes(minerStr), bytes(Strings.toString(miner.initialAdjPower))));
 
         minerStr = string(bytes.concat(bytes(minerStr), bytes("\",\"PercentBeneficiaries\":")));
         minerStr = string(bytes.concat(bytes(minerStr), bytes(percentBeneficiary)));
@@ -82,7 +81,7 @@ library String {
         return minerStr;
     }
 
-    function vestingFundsToString(MinerTypes.VestingFunds[] memory vestingFunds) public view returns (string memory) {
+    function vestingFundsToString(MinerTypes.VestingFunds[] memory vestingFunds) public pure returns (string memory) {
         string memory vestingFundsStr = "[";
 
         for (uint32 i = 0; i < vestingFunds.length; i++) {
@@ -96,10 +95,12 @@ library String {
             int256 epoch = CommonTypes.ChainEpoch.unwrap(vesting.epoch);
             vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), bytes(Strings.toString(epoch))));
 
+            /*
             vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), bytes("\",\"Amount\":")));
             (uint256 amount, bool converted) = BigInts.toUint256(vesting.amount);
             require(converted, "String: convert error");
-            vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), bytes(Uint2Str.toString(amount))));
+            vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), bytes(Strings.toString(amount))));
+            */
 
             vestingFundsStr = string(bytes.concat(bytes(vestingFundsStr), bytes("\"}")));
         }

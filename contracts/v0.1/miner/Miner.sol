@@ -42,6 +42,7 @@ library Miner {
 
         uint256 vestingAmount;
         CommonTypes.ChainEpoch vestingEndEpoch;
+        MinerTypes.VestingFunds[] vestingFunds;
 
         bool exist;
     }
@@ -134,10 +135,16 @@ library Miner {
         MinerAPI.changeOwnerAddress(actorId, addr);
     }
 
-    function getVestingFunds(_Miner storage miner) public returns (string memory) {
+    function prepareVestingFunds(_Miner storage miner) public {
         CommonTypes.FilActorId actorId = CommonTypes.FilActorId.wrap(miner.minerId);
-        MinerTypes.GetVestingFundsReturn memory vestings = MinerAPI.getVestingFunds(actorId);
-        return String.vestingFundsToString(vestings.vesting_funds);
+        MinerTypes.GetVestingFundsReturn memory vestingFunds = MinerAPI.getVestingFunds(actorId);
+        for (uint32 i = 0; i < vestingFunds.vesting_funds.length; i++) {
+            miner.vestingFunds.push(vestingFunds.vesting_funds[i]);
+        }
+    }
+
+    function getVestingFunds(_Miner storage miner) public view returns (string memory) {
+        return String.vestingFundsToString(miner.vestingFunds);
     }
 
     function withdraw(_Miner storage miner) public returns (uint256) {

@@ -15,6 +15,7 @@ import "./send/Send.sol";
 /// @notice Owner actor implementation of Filecoin miner
 contract OwnerActor is Controllable {
     Miner._Miner private _miner;
+    event VestingFunds(string vestingFunds);
 
     constructor() {
     }
@@ -138,7 +139,12 @@ contract OwnerActor is Controllable {
         Miner.setPercentBeneficiary(_miner, percentBeneficiary);
     }
 
-    function getVestingFunds() public onlyController returns (string memory) {
+    function prepareVestingFunds() public onlyController {
+        require(_miner.exist, "Owner: there is no miner custodied");
+        Miner.prepareVestingFunds(_miner);
+    }
+
+    function getVestingFunds() public view returns (string memory) {
         require(_miner.exist, "Owner: there is no miner custodied");
         return Miner.getVestingFunds(_miner);
     }
